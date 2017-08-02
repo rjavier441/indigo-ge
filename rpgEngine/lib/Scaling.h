@@ -61,8 +61,9 @@ public:
 	bool isUnscaled();	// returns true if scale is not scaled
 	void reset();	// marks the scale as unscaled and enables rescaling
 	void scale(sf::Sprite* s, sf::RenderWindow* w);	// calculates 2D scaling parameters for s based on w's dimensions; this method automatically checks if scale is scaled. Calling the function scale() (after previously scaling) without calling reset() has no effect.
-	void scale(sf::Sprite* s, int windowWidth, int windowHeight);	// same as above, but allows direct input of window dimensions
-	void scale(float x, float y);	// same as above, but allows direct input of the scale factor parameters
+	void scale(sf::Sprite* s, int x, int y);	// same as above, but allows direct input of window dimensions; can also be used to acquire the scale of s in reference to an arbitrary size "x" by "y" rect
+	void scale(sf::Text* t, int x, int y);	// same as above, but for text elements
+	void scale(float x, float y);	// same as above for sf::Sprite*, but allows direct input of the scale factor parameters
 	void inferScale(sf::Sprite* src, float srcScaleX, float srcScaleY, float objWidth, float objHeight);	// scale an object based off of another object's scale and dimensions
 	float xScale();	// returns the scaling factor for the x axis
 	float yScale();	// returns the scaling factor for the y axis

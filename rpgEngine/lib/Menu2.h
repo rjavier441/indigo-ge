@@ -4,6 +4,7 @@
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include <cstdio>	//sprintf()
+#include <cstdlib>	//itoa()
 #include <string>
 #include <list>
 // #include "Player.h"
@@ -36,7 +37,7 @@ public:
 
 	bool isClicked(int x, int y);	//checks position of clicks/mouse hovers, and returns action if Box was clicked
 	string getName();
-	string getAction();
+	virtual string getAction();
 	int getTop();
 	int getLeft();
 	int getHeight();
@@ -52,21 +53,37 @@ private:
 	bool Hovering;
 };
 
-class Menu {
+class InventorySlot : public MenuButton {
 public:
-	Menu(string, sf::RenderWindow*);	//constructor with menu title (you'll need to call assign before the menu is used)
-	Menu(string, list<string>&, sf::RenderWindow*);		//constructor w/ menu title, list of buttons to add
+	InventorySlot(string item_name, string action, int left, int top, int width, int height);
+
+	void insert(Item);	// insert item data into the inventory slot
+	// void insert(Weapon);	// ^
+
+	Item* getItem();	// return pointer to item information represented by this slot
+	
+	string getAction();
+private:
+	Item item;
+	bool empty;
+};
+
+class Menu {
+friend class InventoryMenu;
+public:
+	Menu(string menu_name, sf::RenderWindow* w);	//constructor with menu title (you'll need to call assign before the menu is used)
+	Menu(string menu_name, list<string>& n, sf::RenderWindow* w);		//constructor w/ menu title, list of buttons to add
 
 	void setWindowDimensions(int width, int height);	// set window dimensions (disables automatic dimension calculations done by the  assign() function)
 	void setMenuBackground(string path);	//set the menu background img
 	void setMenuButtonBackground(string path);	//set the menu button background img
 	void setMenuFont(string path);	//set font
 	void setTitlePosition(int xpixel, int ypixel);	//set title position
-	void assign(list<string>&);	//assign/reassign buttons to the menu object. Also automatically scales objects, if scaling hasn't been done already
+	virtual void assign(list<string>&);	//assign/reassign buttons to the menu object. Also automatically scales objects, if scaling hasn't been done already
 
-	virtual string Show();	//runs the menu
+	virtual string Show(bool overrideMenuImg = false);	//runs the menu; allows control over whether to display the base menu's texture
 	string leftClick(int, int);	//handles a left-clicking event when in a menu; takes an x,y coords of an event.mouseButton object
-	string isHovering(int, int);	//returns a button name if mouse is hovering over a button, else returns empty string
+	virtual string isHovering(int, int);	//returns a button name if mouse is hovering over a button, else returns empty string
 	sf::RenderWindow* getWindowPtr();
 
 	// Button Backing/Click Region Scaling Functions
@@ -83,7 +100,7 @@ public:
 	string buttonImg;	// Path to button backing img
 	string textFont;	// Path to text font
 private:
-	void checkHovering(int, int);	//checks to see if the mouse is hovering over a button, and changes the button's Hovering status accordingly; takes x,y coords from an event.mouseMove object
+	virtual void checkHovering(int, int);	//checks to see if the mouse is hovering over a button, and changes the button's Hovering status accordingly; takes x,y coords from an event.mouseMove object
 	float adjustMouseDimension (float absoluteMouseCoord, float absoluteWindowDim, float originalWindowDim); // calculates mouse position dimension based on a ratio of the mouse's current absolute position and window's absolute size, and the original absolute size of the window. This effectively maps the dimension in the window's relative coordinate system.
 
 	sf::RenderWindow* WINDOW;
@@ -98,8 +115,8 @@ private:
 
 class StatMenu : public Menu {
 public:
-	StatMenu(string s, sf::RenderWindow* w, Player* p);
-	StatMenu(string s, list<string>& n, sf::RenderWindow* w, Player* p);
+	StatMenu(string menu_name, sf::RenderWindow* w, Player* p);
+	StatMenu(string menu_name, list<string>& n, sf::RenderWindow* w, Player* p);
 
 	string Show();
 private:
@@ -117,10 +134,15 @@ public:
 	InventoryMenu(string menu_name, sf::RenderWindow* window_pointer, Player* main_character);
 
 	void setImg(string imgFileName);	//image must be stored in img/
+	void setSlotImg(string path);		// sets path of inventory slot img
 	void setFont(string fontFileName);	//font must be stored in fonts/
+	void assign(list<string>&);	//assign inventory buttons/item slots
 
 	string Show();
+
+	string isHovering(int, int);
 private:
+	void checkHovering(int, int);
 	void loadInventory(Player* main_character);	// Loads main character's inventory to the InventoryMenu
 
 	sf::RenderWindow* WINDOW;
@@ -128,5 +150,8 @@ private:
 	Inventory* INV;
 	string invTitle;
 	string invImg;
+	string invSlotImg;
 	string invFont;
+	list<InventorySlot> invSlots;
+	FloatScaler invSlotScaler;
 };

@@ -6,7 +6,7 @@ using namespace std;
 */
 
 int main(int argc, char* argv[]){
-	Game game("COY: The Arc Stones");
+	Game game("The Arc Stones");
 	
 	game.Start();
 

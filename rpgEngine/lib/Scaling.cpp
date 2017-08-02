@@ -58,6 +58,20 @@ void FloatScaler::scale (sf::Sprite* s, int windowWidth, int windowHeight) {
 	return;
 }
 
+void FloatScaler::scale (sf::Text* t, int windowWidth, int windowHeight) {
+	if (this->isUnscaled()) {
+		// Acquire size of sprite rectangle in this current frame
+		sf::FloatRect spriteRect = t->getGlobalBounds();
+
+		// Scale
+		Scale.x = (float) windowWidth / (float) spriteRect.width;
+		Scale.y = (float) windowHeight / (float) spriteRect.height;
+		// printf("x:%f y:%f\n", Scale.x, Scale.y);	// debug
+		Scale.scaled = true;
+	}
+	return;
+}
+
 void FloatScaler::scale (float x, float y) {
 	if (this->isUnscaled()) {
 		// printf("Implicit Scaling...");	// debug

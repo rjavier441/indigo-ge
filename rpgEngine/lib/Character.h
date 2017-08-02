@@ -63,7 +63,15 @@ public:
 	Player& setArmor(int);
 	Player& setMagic(int);
 	Player& setAttack(int);
-	Player& pickup();	//adds an object to the Player's inventory
+	Player& pickup(Item);	//adds an object to the Player's inventory
+	Player& pickup(Weapon);
+	Player& pickup(Potion);
+	// Player& pickup(Antidote);	// DEPRECATED
+	Player& pickup(Key);
+	Player& pickup(Armor);
+	// Player& pickup(Clothing);	// DEPRECATED
+
+	void printInventory();// debug
 
 	int getLevel();
 	int getExperience();
@@ -78,7 +86,7 @@ private:
 	int Experience;
 	int MaxHealth;
 	int Health;
-	int Armor;
+	int ArmorPts;
 	int Magic;
 	int Attack;
 	Inventory Bag;

@@ -1,5 +1,4 @@
 #include "Game.h"
-#include "Menu2.h"
 using namespace std;
 
 Game::Game(){
@@ -18,8 +17,19 @@ Game::Game(string t){
 // }
 
 void Game::Start(){
+	// Initialize local variables
+	Difficulty gameDifficulty;
+	bool playingMusic = false;
+	bool menuUnscaled = true;
+	// sf::SoundBuffer buffer;
+	// sf::Sound soundEffect;
+	// sf::Music music;
+	sf::Clock clk;
+	OverlayMenuData omData;
+	int testi = 0;
+
 	// Acquire supported display modes for later user customization
-	printf("Acquiring supported Display Modes...");
+	printf("[Game] Acquiring supported Display Modes...");
 	for (size_t sz = 0; sz < videoModes.size(); ++sz) {
 		sf::VideoMode md = videoModes[sz];
 		// printf("Mode %d: %dx%d - %d bpp\n", (int) sz, md.width, md.height, md.bitsPerPixel);
@@ -40,14 +50,6 @@ void Game::Start(){
 		WINDOW.setIcon(256, 256, gameIcon.getPixelsPtr());
 	}
 
-	// Initialize local variables
-	Difficulty gameDifficulty;
-	// sf::SoundBuffer buffer;
-	// sf::Sound soundEffect;
-	// sf::Music music;
-	bool playingMusic = false;
-	bool menuUnscaled = true;
-
 	// Load all recurring files here; loading/reloading them during each state could be taxing on the cpu/gpu
 	sf::Texture splashTexture;
 	sf::Font splashFont;
@@ -55,36 +57,47 @@ void Game::Start(){
 	sf::Font pauseFont;
 	sf::Texture newgameTexture;
 	sf::Font newgameFont;
-	if (!newgameTexture.loadFromFile("img/splashscreen.png")){	// Load new game window background
-		cout << endl << "Error: newgameTexture load unsuccessful" << endl;
+	printf("[Game] Loading resources...");	// debug
+	if (!newgameTexture.loadFromFile("img/splashscreen2.png")){	// Load new game window background
+		cout << endl << "[Game] Error: newgameTexture load unsuccessful" << endl;
 		changeState(Error);
 		WINDOW.close();
 	};
 	if (!newgameFont.loadFromFile("fonts/Garuda.ttf")){	// Load splash screen font
-		cout << endl << "Error: newgameFont load unsuccessful" << endl;
+		cout << endl << "[Game] Error: newgameFont load unsuccessful" << endl;
 		changeState(Error);
 		WINDOW.close();
 	};
-	if (!pauseTexture.loadFromFile("img/ironman_III.png")){	// Load pause screen background
+	if (!pauseTexture.loadFromFile("img/pausescreen.png")){	// Load pause screen background
 		changeState(Error);
-		cout << endl << "Error: pauseTexture load unsuccessful" << endl;
+		cout << endl << "[Game] Error: pauseTexture load unsuccessful" << endl;
 		WINDOW.close();
 	}
 	if (!pauseFont.loadFromFile("fonts/FreeSerif.ttf")){	// Load pause screen font
 		changeState(Error);
-		cout << endl << "Error: pauseFont load unsuccessful" << endl;
+		cout << endl << "[Game] Error: pauseFont load unsuccessful" << endl;
 		WINDOW.close();
 	};
-	if (!splashTexture.loadFromFile("img/splashscreen.png")){	// Load splash screen background
-		cout << endl << "Error: splashTexture load unsuccessful" << endl;
+	if (!splashTexture.loadFromFile("img/splashscreen2.png")){	// Load splash screen background
+		cout << endl << "[Game] Error: splashTexture load unsuccessful" << endl;
 		changeState(Error);
 		WINDOW.close();
 	};
 	if (!splashFont.loadFromFile("fonts/Garuda.ttf")){	// Load splash screen font
-		cout << endl << "Error: splashFont load unsuccessful" << endl;
+		cout << endl << "[Game] Error: splashFont load unsuccessful" << endl;
 		changeState(Error);
 		WINDOW.close();
 	};
+	printf("Done\n");	// debug
+
+	// Load tile set information
+	printf("[Game] Loading tile set...");
+	if (!WORLD.loadTiles("maps/tiledb/TileIndex.txt")) {
+		cout << endl << "[Game] Error: WORLD could not load Tile Data" << endl;
+		changeState(Error);
+		WINDOW.close();
+	}
+	printf("Done\n");
 
 	// Setup a world variable for later use
 	WORLD.setWindow(&WINDOW);
@@ -108,7 +121,7 @@ void Game::Start(){
 				// Load splash screen music
 				if (!playingMusic){
 					playingMusic = true;
-					if (!music.openFromFile("audio/Greensleeves-1-greensleeves-2096-6987.ogg")){
+					if (!music.openFromFile("audio/750286_Sedisverse-Ost--Shadows.ogg")){
 						changeState(Error);
 						break;
 					}
@@ -125,7 +138,7 @@ void Game::Start(){
 				splashTitle.setStyle(sf::Text::Italic);
 				splashTitle.setPosition(TitleX,TitleY);
 
-				// Draw to window after clearing
+				// After drawing menu elements, Draw title to window
 				WINDOW.clear();
 				WINDOW.draw(splashSprite);
 				WINDOW.draw(splashTitle);
@@ -181,13 +194,14 @@ void Game::Start(){
 			}
 			case Paused:{
 				// Initialize objects
-				// sf::Sprite pauseSprite(pauseTexture);
+				sf::Sprite pauseSprite(pauseTexture);
+				pauseSprite.setScale(splashScaler.xScale(), splashScaler.yScale());
 				// sf::Text pauseText("Paused", pauseFont, 50);
 
 				// Draw to window after resetting and clearing
 				WINDOW.clear();
 				WINDOW.setView(WINDOW.getDefaultView());
-				// WINDOW.draw(pauseSprite);
+				WINDOW.draw(pauseSprite);
 				// WINDOW.draw(pauseText);
 
 				// Initialize pause menu
@@ -211,12 +225,6 @@ void Game::Start(){
 					soundEffect.setBuffer(buffer);
 					soundEffect.setVolume(25);
 					soundEffect.play();
-
-					// Stop background music
-					if (playingMusic){
-						playingMusic = false;
-						music.stop();
-					}
 				}
 				if (status == "Return") {
 					changeState(PREVSTATE);
@@ -229,17 +237,24 @@ void Game::Start(){
 				break;
 			}
 			case CheckingInventory:{
+				// WORLD.getMainCharPtr()->printInventory();	// debug
+
 				// Draw to window after resetting and clearing
 				WINDOW.clear();
 				WINDOW.setView(WINDOW.getDefaultView());
 
 				// Initialize inventory menu
 				InventoryMenu imenu("Inventory", &WINDOW, WORLD.getMainCharPtr());
+				imenu.setSlotImg("img/menu_inventory_slot_default.png");
 				imenu.setWindowDimensions(windowX, windowY);	// to properly scale mouse coords
 				imenu.setScale(menuScaler.xScale(), menuScaler.yScale());	// to properly scale 
 				imenu.setBackgroundScale(menuBkgdScaler.xScale(), menuBkgdScaler.yScale());	// to properly scale menu backings
 				list<string> btn;
 				btn.push_front("Return");
+				// btn.push_front("Weapons");
+				// btn.push_front("Quest Items");
+				// btn.push_front("Consumables");
+				// btn.push_front("Armor");
 				imenu.assign(btn);
 				imenu.setTitlePosition(windowX/22, windowY/2);	// to properly position the menu title
 
@@ -247,12 +262,106 @@ void Game::Start(){
 				string status = imenu.Show();
 
 				// Handle menu response
+				if (status != "") {
+					// Load and play a sound when an option was selected
+					if (!buffer.loadFromFile("audio/sfx/fire_bow_sound-mike-koenig.wav")) changeState(Error);
+					soundEffect.setBuffer(buffer);
+					soundEffect.setVolume(25);
+					soundEffect.play();
+				}
 				if (status == "Return") {
 					changeState(PREVSTATE);
+				} else if (status == "Quitting") {
+					changeState(Quitting);
 				} else if (status == "Error") {
 					changeState(Error);
 				}
 				
+				break;
+			}
+			case Interacting:{	// i.e. open doors, loot corpses, pick up quest items/objects, etc.
+				Player* mc = WORLD.getMainCharPtr();
+				Position mcPos = mc->getPosition();
+				vector<sf::Sprite> iDrawings;
+				vector<sf::Texture> iTextures;
+
+				// Acquire elements of the last frame
+				if (!getLastFrame(&iDrawings, &iTextures)) {
+					printf("[Game] Failed to draw previous Freeroaming frame\n");
+					changeState(Error);
+					break;
+				}
+
+				// Test: remain in interaction mode for 3 sec
+				// sf::Time now = clk.getElapsedTime();
+				// float sec = now.asSeconds();
+				// if (testi == 0) {
+				// 	printf("[Game] Interacting...");
+				// 	testi = 1;
+				// }
+				// if (sec >= 3.0) {
+				// 	printf("Done\n");
+				// 	changeState(Freeroaming);
+				// 	testi = 0;
+					clk.restart();
+				// }
+
+				// Draw previous frame
+				WINDOW.clear();
+				for (int i = 0; i < iDrawings.size(); i++) {
+					WINDOW.draw(iDrawings[i]);
+				}
+				// WINDOW.draw(randTxt);
+				// WINDOW.display();	// handled by Overlay.h
+
+				// Draw interaction overlay menu
+				OverlayMenu om(&WINDOW, mcPos.x + 32, mcPos.y);
+				om.setName("Interact");
+				om.setFont("CaviarDreams.ttf");
+				/*
+					om.setWidth(128);
+					om.setFontSize(60);
+					om.setTitlePos(0, -60);
+					om.setOptionOffset(0,0);
+					om.setDynamic();	// done automatically
+				*/
+				om.setBackground("overlay_default.png");
+				om.setCursorImg("overlay_cursor_default.png");
+				om.setCursorPos(&omData.cursor_position);
+				om.setViewTop(&omData.range_top);
+				om.showTitle();
+				
+				/* TODO: */
+				// Acquire context (determine what nearby objects the character can interact with, and how to interact with them)
+				Context* mcContext = WORLD.getContextPtr();
+				
+				// Add the options (i.e. action names) of each available context action
+				vector<string>* vectPtr = mcContext->getActionStringPtr();
+				for (int i = 0; i < mcContext->size(); i++){
+					om.addOption(vectPtr->at(i).c_str());
+				}
+
+				string status = om.Show();
+
+				// Handle all possible interaction state feedback here
+				if (status != "") {
+					if (status == "Error") {
+						changeState(Error);
+					} else if (status == "Cancel" || status == "Return") {
+						changeState(PREVSTATE);
+					} else {
+						/* TODO: */
+						// Determine appropriate action based on the returned option.
+						Interaction temp = WORLD.interact(om.getCursorPosition() - 1);	// cursor index is offet by 1 due to "Cancel" being the first button
+
+						printf("[Game] Interaction: %d -> %d\n", static_cast<int>(temp.action), static_cast<int>(temp.target));	//debug
+						execute(&temp);	// Note: this also automatically peforms a changeState() call
+						// changeState(PREVSTATE);	// debug
+					}
+
+					printf("[Game] Overlay status: %s\n", status.c_str());	// debug
+				}
+
 				break;
 			}
 			case Loading:{
@@ -263,13 +372,17 @@ void Game::Start(){
 				break;
 			}
 			case NewGameSetup:{
+				// Determine desired element positions
+				unsigned int TitleX = videoModes[currentVideoMode].width/30;	// 1/30 of screen width
+				unsigned int TitleY = videoModes[currentVideoMode].height/30;	// 1/30 of screen 
+
 				// Initialize objects
 				sf::Sprite newgameSprite(newgameTexture);
-				sf::Text newgameTitle("The Arc Stones",newgameFont,70);
+				sf::Text newgameTitle(gameTitle,newgameFont,70);
 				newgameSprite.setScale(splashScaler.xScale(), splashScaler.yScale());
 				newgameTitle.setColor(sf::Color::White);
 				newgameTitle.setStyle(sf::Text::Italic);
-				newgameTitle.setPosition(30,30);
+				newgameTitle.setPosition(TitleX,TitleY);
 
 				// Draw to window after clearing
 				WINDOW.clear();
@@ -304,6 +417,9 @@ void Game::Start(){
 					if (status == "Return"){
 						changeState(PREVSTATE);
 						break;
+					} else if (status == "Quitting") {
+						changeState(Quitting);
+						break;
 					} else {
 						// Stop background music
 						if (playingMusic){
@@ -311,6 +427,7 @@ void Game::Start(){
 							music.stop();
 						}
 
+						// Set game difficulty
 						if (status == "Easy") {
 							gameDifficulty = Easy;
 						} else if (status == "Normal") {
@@ -321,23 +438,59 @@ void Game::Start(){
 							gameDifficulty = Easy;
 						}
 
-						// Prepare the starting world
-						WORLD.setWorldName("Kingdom of York");
-						if (!WORLD.loadMap("TestRoom.png")) {
-							cout << endl << "[Game] World load failed" << endl;
-							changeState(Error);
-							break;
-						}
-						if (!WORLD.loadData("TestRoom.txt")) {
-							cout << endl << "[Game] World load failed" << endl;
-							changeState(Error);
-							break;
-						}
-						WORLD.setLocation();	// set the player's location to the default spawn point
+						// Prepare player's starting inventory
+						// Item Deed("Deed", "Quest Item", "img/items/scroll.png", "The deed to your mansion", 0,1);
+						// Item EightBall("8-ball", "Quest Item", "img/Farm-Fresh_sport_8ball.png", "A magic 8-ball that can make decisions for you", 1,1);
+						// Item Cutlass("Cutlass", "Weapon", "img/items/cutlass.png", "A plain but well made shortsword", 10,1);
+						// Item PlatedShield("Plated Shield", "Armor", "img/items/shield.png", "A cast-iron shield", 10, 1);
+						// Item Tome("Valindyr's Tome", "Quest Item", "img/items/Valindyrs_Tome.png", "The memorial tome of Sir Valindyr III", 4, 1);
+						// WORLD.getMainCharPtr()->pickup(Deed);
+						// WORLD.getMainCharPtr()->pickup(EightBall);
+						// WORLD.getMainCharPtr()->pickup(Cutlass);
+						// WORLD.getMainCharPtr()->pickup(PlatedShield);
+						// WORLD.getMainCharPtr()->pickup(Tome);
 
-						changeState(Freeroaming);
+						// Prepare the starting world
+						WORLD.setWorldName("Kingdom of York");	// name of realm, NOT map
+						WORLD.setDest("TestArea");
+						WORLD.setDestSpawn("Spawn1");
+						changeState(ChangingMap);
 					}
 				}
+
+				break;
+			}
+			case ChangingMap:{
+				// Stop music
+				if (playingMusic) {
+					playingMusic = false;
+					music.stop();
+				}
+
+				// Load map
+				printf("[Game] Loading map \"%s\"...\n", WORLD.getDest().c_str());	// debug
+				if (!WORLD.loadMap(WORLD.getDest() + ".png")) {
+					cout << endl << "[Game] Map load failed" << endl;
+					changeState(Error);
+					break;
+				}
+				if (!WORLD.loadData(WORLD.getDest() + ".txt")) {
+					cout << endl << "[Game] Data load failed" << endl;
+					changeState(Error);
+					break;
+				}
+				printf("[Game] Done loading map\n");	// debug
+				
+				// Set the player's location (no args = default spawn point)
+				printf("[Game] Spawning at spawn point \"%s\"...", WORLD.getDestSpawn().c_str());	// debug
+				if (!WORLD.setSpawn(WORLD.getDestSpawn())) {
+					printf("[Game] Error: spawn unsuccessful\n");	// debug
+					changeState(Error);
+					break;
+				}
+				printf("[Game] Done spawning\n");	// debug
+
+				changeState(Freeroaming);
 
 				break;
 			}
@@ -348,11 +501,36 @@ void Game::Start(){
 				break;
 			}
 			case Freeroaming:{
+				// Load map music
+				if (!playingMusic){
+					playingMusic = true;
+					if (!music.openFromFile("audio/" + WORLD.getMusic())){
+						printf("[Game] Error: Unable to play map music \"\"");
+						changeState(Error);
+						break;
+					}
+					music.setLoop(true);
+					music.play();
+				}
+
 				string status = WORLD.Show();
 				
 				if (status != "") {
 					if (status == "Quitting") {
 						changeState(Quitting);
+					} else if (status == "Interact") {
+						// Acquire a snapshot of the prev frame (i.e. so that the interaction menu can be overlayed above it to give the illusion that the game is paused while the user decides what to do)
+						// sf::Vector2u winSize = WINDOW.getSize();
+						// if (!temporaryTexture.create(winSize.x, winSize.y)) {
+						// 	printf("[Game] Unable to create temporaryTexture\n");
+						// 	changeState(Error);
+						// 	break;
+						// }
+						// temporaryTexture.update(WINDOW);
+						clk.restart();
+						omData.cursor_position = 0;	// reset OverlayMenu cursor to point to option 0
+						omData.range_top = 0;	// reset OverlayMenu range top to point to the first "viewRange" number of options
+						changeState(Interacting);
 					} else if (status == "Inventory") {
 						changeState(CheckingInventory);
 					} else if (status == "Paused") {
@@ -387,6 +565,131 @@ void Game::changeState(GameState s){
 	GameState temp = s;
 	PREVSTATE = STATE;
 	STATE = temp;
+	return;
+}
+
+bool Game::getLastFrame(vector<sf::Sprite>* spritePtr, vector<sf::Texture>* texturePtr){
+	/*
+		texturePtr:
+			[0] -> references the player's texture
+			[...] -> TBD
+	*/
+
+	Player* mc = WORLD.getMainCharPtr();
+	Position mcPos = mc->getPosition();
+
+	// Load previous frame from WORLD; pass it to spritePtr
+	sf::Sprite snapshot;
+	/*snapshot.setTexture((WORLD.getFrame())->getTexture());
+	snapshot.setTexture((*WORLD.getMap()));*/
+	snapshot.setTexture((WORLD.getMapRender())->getTexture());	// loads map texture
+	spritePtr->push_back(snapshot);
+
+	// Draw previous frame's player; pass it to spritePtr
+	sf::Sprite playerSnapshot;
+	sf::Texture playerSnapshotTexture;
+	if (!playerSnapshotTexture.loadFromFile("img/characters/" + mc->getImage())) {
+		printf("[Game] Error: unable to load player texture \"%s\"\n", mc->getImage().c_str());
+		return false;
+	}
+	texturePtr->push_back(playerSnapshotTexture);
+	playerSnapshot.setTexture((*texturePtr)[0]);
+	playerSnapshot.setPosition(mcPos.x, mcPos.y);
+	WORLD.animateChar(&playerSnapshot, WORLD.getMainCharPtr());
+	spritePtr->push_back(playerSnapshot);
+
+	// TODO: Pass other elements back to be drawn to the window (i.e. npcs, objects, etc.)
+
+
+	return true;
+}
+bool Game::execute (Interaction* ptr) {	// performs the action indicated by "ptr"; whether or not a player is able to do the action is up to World::interact()
+	int action = static_cast<int>(ptr->action);
+	int target = static_cast<int>(ptr->target);
+	int cid = ptr->cid;
+	int eid = ptr->eid;
+
+	/*BEGIN: debug*/
+	string actionStr, targetStr;
+	switch (action) {
+		case AT_UNDEFINED:
+			actionStr = "undefined";
+			break;
+		case AT_ENTER:
+			actionStr = "enter";
+			break;
+		case AT_EXAMINE:
+			actionStr = "examine";
+			break;
+		case AT_PICKUP:
+			actionStr = "pickup";
+			break;
+		default:
+			actionStr = "";
+	}
+	switch (target) {
+		case MO_UNKNOWN:
+			targetStr = "unknown";
+			break;
+		case MO_DOORWAY:
+			targetStr = "doorway";
+			break;
+		case MO_TRAVELPOINT:
+			targetStr = "travelpoint";
+			break;
+		case MO_CONTAINER:
+			targetStr = "container";
+			break;
+		case MO_ATTAINABLE:
+			targetStr = "attainable";
+			break;
+		default:
+			targetStr = "";
+	}
+	printf("[Game] \tContext[%d]: Executing \"%s\" to \"%s[%d]\" (%s)\n", cid, actionStr.c_str(), targetStr.c_str(), eid, ptr->actionDesc.c_str());
+	/*END: debug*/
+
+	switch (action) {
+		case AT_UNDEFINED:
+			// Do nothing...
+			changeState(PREVSTATE);	// restore state
+			break;
+		case AT_ENTER: {
+			switch (target) {
+				case MO_UNKNOWN:
+					// Do nothing...
+					changeState(PREVSTATE);	// restore state
+					break;
+				case MO_DOORWAY: {
+					// Acquire destination information about the doorway specified by the Interaction
+					Doorway temp = WORLD.getDoorwayPtr()->at(eid);
+					string destMap = temp.destMap;
+					string destSpawnName = temp.destSpawnName;
+					printf("[Game] \tInitiating transfer to \"%s\" in \"%s\"\n", destSpawnName.c_str(), destMap.c_str());	// debug
+
+					// Initiate Inter-Map Travel
+					WORLD.setDest(destMap);
+					WORLD.setDestSpawn(destSpawnName);
+					changeState(ChangingMap);	// change map
+					break;
+				}
+				case MO_TRAVELPOINT:
+					/* TODO */
+					break;
+				default:
+					printf("[Game] Invalid MapObject \"%d\" associated with ActionType \"%d\"", target, action);	// debug
+					changeState(PREVSTATE);	// restore state
+					return false;
+			}
+			break;
+		}
+		default:
+			printf("[Game] Unrecognized ActionType \"%d\"", action);	// debug
+			changeState(PREVSTATE);	// restore state
+			return false;
+	}
+
+	return true;
 }
 
 /*Initialize static vars*/

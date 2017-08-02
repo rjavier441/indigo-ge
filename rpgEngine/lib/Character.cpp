@@ -1,4 +1,5 @@
 #include "Character.h"
+#include "Items.h"	//Inventory, Items
 using namespace std;
 
 /*Class Character*/
@@ -129,7 +130,7 @@ Player::Player () : Character () {
 	Experience = 0;
 	MaxHealth = 100;
 	Health = 100;
-	Armor = 0;
+	ArmorPts = 0;
 	Magic = 0;
 	Attack = 10;
 }
@@ -138,7 +139,7 @@ Player::Player (string n, int lvl, int xp, int mhp, int hp, int ap, int md, int 
 	Experience = xp;
 	MaxHealth = mhp;
 	Health = hp;
-	Armor = ap;
+	ArmorPts = ap;
 	Magic = md;
 	Attack = ad;
 }
@@ -168,7 +169,7 @@ Player& Player::setHP (int h) {
 	return *this;
 }
 Player& Player::setArmor (int a) {
-	Armor = a;
+	ArmorPts = a;
 	return *this;
 }
 Player& Player::setMagic (int m) {
@@ -179,8 +180,51 @@ Player& Player::setAttack (int a) {
 	Attack = a;
 	return *this;
 }
-Player& Player::pickup () {
-	// To do...
+Player& Player::pickup (Item i) {
+	Bag.items.push_back(i);
+	return *this;
+}
+Player& Player::pickup (Weapon w) {
+	Bag.weapons.push_back(w);
+	return *this;
+}
+Player& Player::pickup (Potion p) {
+	Bag.potions.push_back(p);
+	return *this;
+}
+// Player& Player::pickup (Antidote a) {	// DEPRECATED
+// 	Bag.antidotes.push_back(a);
+// 	return *this;
+// }
+Player& Player::pickup (Key k) {
+	Bag.keys.push_back(k);
+	return *this;
+}
+Player& Player::pickup (Armor a) {
+	Bag.armors.push_back(a);
+	return *this;
+}
+// Player& Player::pickup (Clothing c) {	// DEPRECATED
+// 	Bag.clothes.push_back(c);
+// 	return *this;
+// }
+
+void Player::printInventory () {
+	printf("%s\n", "[Player] Inventory Contents:");
+
+	// Print Items
+	printf("[Player]===Items===\n");
+	if (Bag.items.empty()) {
+		printf("[Player]\tEmpty\n");
+	} else {
+		for (int i = 0; i < Bag.items.size(); i++) {
+			printf("[Player]\t%s [%s type] (path:%s), %s {%d lbs} <Qty:%d>\n", Bag.items[i].Name.c_str(), Bag.items[i].Type.c_str(), Bag.items[i].Image.c_str(), Bag.items[i].Description.c_str(), Bag.items[i].Weight, Bag.items[i].Amount);
+		}
+	}
+
+	// // Print Weapons
+	// printf("[Player]===Weapons===");
+	return;
 }
 
 int Player::getLevel () {
@@ -196,7 +240,7 @@ int Player::getHP () {
 	return Health;
 }
 int Player::getArmor () {
-	return Armor;
+	return ArmorPts;
 }
 int Player::getMagic () {
 	return Magic;

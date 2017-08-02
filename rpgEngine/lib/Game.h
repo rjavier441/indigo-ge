@@ -3,11 +3,13 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include "World.h"
-#include "Scaling.h"
+#include "World.h"			// World
+#include "Scaling.h"		// FloatScaler
+#include "Menu2.h"			// Menu
+#include "Overlay.h"		// OverlayMenu
+#include "Utilities.h"		// Context
+#include "Interactions.h"	// ActionType, Interaction
 #include <vector>
-// #include "Player.h"
-// #include "Character.h"
 using namespace std;
 
 enum GameState {
@@ -17,7 +19,9 @@ enum GameState {
 	Loading,
 	Paused,
 	CheckingInventory,
+	Interacting,
 	NewGameSetup,
+	ChangingMap,
 	Uninitialized,
 	Freeroaming,
 	Fighting,
@@ -38,8 +42,10 @@ public:
 	sf::Sound soundEffect;
 	sf::Music music;
 
-	// GameState StartScreen(sf::RenderWindow&);
 private:
+	bool getLastFrame(vector<sf::Sprite>* spritePtr, vector<sf::Texture>* texturePtr);	// draws the last frame shown from the Freeroaming state. Upon successful execution, "spritePtr" will contain all sprites that must be drawn to the WINDOW externally (i.e. from the Game's main loop), and "texturePtr" will contain all corresponding textures.
+	bool execute(Interaction* ptr);	// perform the action defined by the interaction given by the "Interacting" GameState; returns true on success
+
 	static GameState STATE;
 	static GameState PREVSTATE;
 	static sf::RenderWindow WINDOW;
@@ -52,12 +58,4 @@ private:
 	FloatScaler splashScaler;	// scales the splash screen's background image
 	FloatScaler menuScaler;	// scales a menu's button sprites/clickable regions
 	FloatScaler menuBkgdScaler;	// scales a menu's backing
-	// sf::Music MUSIC;
-	// sf::Texture BACK;
-	// sf::Font FONT;
 };
-
-// void initializeMenuScaling (sf::Sprite* menu, sf::Sprite* menubtn) {
-	
-// 	return;	
-// }

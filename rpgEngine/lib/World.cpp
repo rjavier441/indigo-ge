@@ -5,8 +5,13 @@ using namespace std;
 World::World () {
 	DATA.setName("???");
 	MAPRENDER.create(3200,3200);	// Default rendertexture size to max map size in pixels
-	MainChar.setName("Antonius").setLevel(0).setExperience(0).setMaxHealth(100).setHP(100).setArmor(100).setMagic(1).setAttack(10);
+	MainChar.setName("Antonius").setLevel(0).setExperience(0).setMaxHealth(100).setHP(100).setArmor(
+		100).setMagic(1).setAttack(10);
+	MainChar.printInventory();	// debug
 	MainChar.setImage("hero_test.png");
+	DESTINATION = "";
+	DESTINATIONSPAWN = "";
+	tileindex = NULL;
 }
 World::World (sf::RenderWindow* w) {
 	WINDOW = w;
@@ -14,6 +19,12 @@ World::World (sf::RenderWindow* w) {
 	MAPRENDER.create(3200,3200);	// Default rendertexture size to max map size in pixels
 	MainChar.setName("Antonius").setLevel(0).setExperience(0).setMaxHealth(100).setHP(100).setArmor(100).setMagic(1).setAttack(10);
 	MainChar.setImage("hero_test.png");
+	DESTINATION = "";
+	DESTINATIONSPAWN = "";
+	tileindex = NULL;
+}
+World::~World () {
+	delete tileindex;
 }
 
 void World::setWorldName (string n) {
@@ -40,6 +51,31 @@ bool World::setLocation (int x, int y) {
 		}
 	}
 }
+bool World::setSpawn (string spawnPointName) {
+	if (SPAWNPOINT.empty()) {
+		printf("[World] Error: No spawn points found\n");	// debug
+		return false;
+	}
+
+	// Compare given name with all spawn point names
+	for (int i = 0; i < SPAWNPOINT.size(); i++) {
+		if (spawnPointName == SPAWNPOINT[i].spawnName) {
+			MainChar.setLocation(&DATA, SPAWNPOINT[i].x, SPAWNPOINT[i].y);
+			return true;
+		}
+	}
+
+	printf("[World] Error: No matching spawn \"%s\"", spawnPointName.c_str());	// debug
+	return false;
+}
+void World::setDest (string dst) {
+	DESTINATION = dst;
+	return;
+}
+void World::setDestSpawn (string dstspn) {
+	DESTINATIONSPAWN = dstspn;
+	return;
+}
 bool World::loadMap (string img) {
 	string tempfilename = "maps/img/" + img;
 
@@ -54,6 +90,11 @@ bool World::loadData (string datafile) {
 	ifstream file;
 	string tempfilename = "maps/data/" + datafile;
 
+	// Clear data from the previous map, if any
+	if (!SPAWNPOINT.empty()) SPAWNPOINT.clear();
+	if (!DOORWAY.empty()) DOORWAY.clear();
+	DATA.clear();
+
 	// Open file
 	file.open(tempfilename.c_str());
 	if(file.fail()){
@@ -65,6 +106,7 @@ bool World::loadData (string datafile) {
 	// Load map data
 	// short state = 0;	// 0 = naming, 1 = sizing, 2 = coords
 	int lineNum = 0;
+	printf("[World] #### Loading Map Data ####\n");	// debug
 	while (!file.eof()) {
 		string temp;
 
@@ -76,161 +118,21 @@ bool World::loadData (string datafile) {
 			return false;
 		}
 	}
+	printf("[World] #### Done ####\n");	// debug
 
 	file.close();
 	return true;
 }
+bool World::loadTiles (string path) {
+	if (tileindex != NULL) delete tileindex;	// clear tileindex 
+	tileindex = new TileIndex;
 
-string World::Show () {
-/*
-	// Format world view
-		VIEW.setCenter(POS.x,POS.y);
-		VIEW.setSize(DATA.pixelX(),DATA.pixelY());
-		// VIEW.setViewport(sf::FloatRect(0.25f, 0.25, 0.5f, 0.5f));	// shows center-half rectangle of screen
-		VIEW.setViewport(sf::FloatRect(0.2f, 0.2, 0.6f, 0.6f));
-
-		// Setup map image
-		MAPRENDER.clear(sf::Color::Black);
-
-		// Draw stuff in map render texture and "save it" (display it)
-		sf::Sprite mapImg(MAP);
-		MAPRENDER.draw(mapImg);
-		MAPRENDER.display();
-
-		// Create the hero sprite
-		sf::Texture HeroTexture;
-		if (MAINCHARIMAGE.empty()) {
-			cout << endl << "[World] Error: Main character image not set" << endl;
-			return "Error";
-		}
-		if (!HeroTexture.loadFromFile("img/characters/" + MAINCHARIMAGE)) {
-			cout << endl << "[World] Error: " << MAINCHARIMAGE << "failed to load" << endl;
-			return "Error";
-		}
-		sf::Sprite HeroSprite(HeroTexture);
-		HeroSprite.setPosition( POS.x, POS.y );
-
-		// Animate the main char image to simulate movement
-		animate(&HeroSprite, &POS, &LOCATION);
-
-		// Clear window
-		WINDOW->clear();
-
-		// Draw map texture and hero to window
-		sf::Sprite mapImgSprite(MAPRENDER.getTexture());
-		WINDOW->draw(mapImgSprite);
-		WINDOW->setView(VIEW);
-		WINDOW->draw(HeroSprite);
-
-		// Event processing
-		sf::Event event;
-		while (WINDOW->pollEvent(event)) {
-			if (event.type == sf::Event::Closed) {
-				return "Quitting";
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
-				return "Paused";
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-				move(Left);
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-				move(Right);
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-				move(Down);
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-				move(Up);
-			}
-		}
-
-		// Display
-		WINDOW->display();
-		return "";
-*/
-	// Format world view
-	Position MainCharacterPos = MainChar.getPosition();
-	VIEW.setCenter(MainCharacterPos.x, MainCharacterPos.y);
-	VIEW.setSize(DATA.pixelX(), DATA.pixelY());
-	// VIEW.setViewport(sf::FloatRect(0.25f, 0.25, 0.5f, 0.5f));	// shows center-half rectangle of screen
-	VIEW.setViewport(sf::FloatRect(0.2f, 0.2, 0.6f, 0.6f));
-
-	// Setup map image
-	MAPRENDER.clear(sf::Color::Black);
-
-	// Draw stuff in map render texture and "save it" (display it)
-	sf::Sprite mapImg(MAP);
-	MAPRENDER.draw(mapImg);
-	MAPRENDER.display();
-
-	// Create the main character's sprite
-	sf::Texture HeroTexture;
-	if (MainChar.getImage() == "") {
-		cout << endl << "[World] Error: Main character image not set" << endl;
-		return "Error";
-	}
-	if (!HeroTexture.loadFromFile("img/characters/" + MainChar.getImage())) {
-		cout << endl << "[World] Error: " << MainChar.getImage() << "failed to load" << endl;
-		return "Error";
-	}
-	sf::Sprite HeroSprite(HeroTexture);
-	HeroSprite.setPosition( MainCharacterPos.x, MainCharacterPos.y );
-
-	// Draw NPC sprite(s)
-
-	// Animate the main char image to simulate movement
-	animateChar(&HeroSprite, &MainChar);
-
-	// Animate NPC sprite movement(s)
-
-	// Clear window
-	WINDOW->clear();
-
-	// Draw map texture and hero to window
-	sf::Sprite mapImgSprite(MAPRENDER.getTexture());
-	WINDOW->draw(mapImgSprite);
-	WINDOW->setView(VIEW);
-	WINDOW->draw(HeroSprite);
-
-	// Draw NPC sprite(s) to window
-
-
-	// Event processing
-	sf::Event event;
-	while (WINDOW->pollEvent(event)) {
-		if (event.type == sf::Event::Closed) {
-			return "Quitting";
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
-			return "Paused";
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-			MainChar.move(&DATA, Left);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-			MainChar.move(&DATA, Right);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-			MainChar.move(&DATA, Down);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-			MainChar.move(&DATA, Up);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::I)) {	// Launch Inventory menu
-			return "Inventory";
-		}
+	if (!tileindex->read(path)) {
+		cout << endl << "[World] Failed to load tile index file" << endl;
+		return false;
 	}
 
-	// Display
-	WINDOW->display();
-	return "";
-}
-string World::getName () {
-	return DATA.getName();
-}
-Player* World::getMainCharPtr () {
-	return &MainChar;
+	return true;
 }
 void World::animateChar (sf::Sprite* sprite, Player* thePlayer) {
 	/*
@@ -385,33 +287,278 @@ void World::animateChar (sf::Sprite* sprite, Player* thePlayer) {
 
 	// cout << endl << "[World] thePlayer->setMoveDone(:" << thePlayer->setMoveDone( << " x:" << thePlayer->getPosition().x << " y:" << thePlayer->getPosition().y << " goalx:" << goalPixelX << " goaly:" << goalPixelY;
 }
+
+string World::Show () {
+	// Format world view
+	Position MainCharacterPos = MainChar.getPosition();
+	VIEW.setCenter(MainCharacterPos.x, MainCharacterPos.y);
+	VIEW.setSize(480, 480);	// lock the view to show a 15x15 tile area (480x480 px)
+	// VIEW.setViewport(sf::FloatRect(0.2f, 0.2, 0.6f, 0.6f));
+	MAPRENDER.clear(sf::Color::Black);
+
+	// Setup and draw map base image (i.e. floors/walls)
+	sf::Sprite mapImg(MAP);
+	MAPRENDER.draw(mapImg);
+
+	// TODO: Setup interactive image(s) (i.e. place animatable doors, or overhanging arches; things with world height > 0)
+	// Setup and draw Doorways
+	for (int i = 0; i < DOORWAY.size(); i++) {
+		// Load door image and create sprite
+		sf::Texture doorTexture;
+		if (!doorTexture.loadFromFile(TILEDIR + DOORWAY[i].filename)) {
+			printf("[World] Error: unable to load door texture \"%s\"\n", DOORWAY[i].filename.c_str());
+			return "Error";
+		}
+		sf::Sprite doorImg(doorTexture);
+
+		// Properly size and "phase" the door image and view (i.e. size the door tile's view as a 32x32px img, and select the correct door image for the state of the door)
+		int doorImgYpx = 0;
+		// printf("MC:%d,%d %s:%d,%d Adj:%d Locked:%d, Actn:%d, Dist:%f, inRange:%d\n",
+		// 	MainChar.getLocation().x,
+		// 	MainChar.getLocation().y,
+		// 	DOORWAY[i].doorName.c_str(),
+		// 	DOORWAY[i].getLocation().x,
+		// 	DOORWAY[i].getLocation().y,
+		// 	static_cast<int>(adjacent(MainChar.getLocation(), DOORWAY[i].getLocation())),
+		// 	static_cast<int>(DOORWAY[i].isLocked()),
+		// 	static_cast<int>(DOORWAY[i].action),
+		// 	getDistance(MainChar.getLocation(), DOORWAY[i].getLocation()),
+		// 	static_cast<int>(DOORWAY[i].inRange(MainChar.getLocation()))
+		// );	// debug
+		if (adjacent(MainChar.getLocation(), DOORWAY[i].getLocation())) {
+			// printf("[World] Character is next to \"%s\"\n", DOORWAY[i].doorName.c_str());	// debug
+			doorImgYpx = 32;	// selects the "half-open" door image
+		} else {
+			// printf("[World] Character is away from \"%s\"\n", DOORWAY[i].doorName.c_str());	// debug
+		}
+		doorImg.setTextureRect(sf::IntRect(0, doorImgYpx, 32, 32));
+
+		// Properly position the door in the map
+		doorImg.setPosition(sf::Vector2f(DOORWAY[i].x * 32, DOORWAY[i].y * 32));
+
+		// Draw door to map
+		MAPRENDER.draw(doorImg);
+
+		// printf("[World] Doorway \"%s\", %s\n", DOORWAY[i].doorName.c_str(), DOORWAY[i].filename.c_str());	// debug
+	}
+
+	// TODO: Setup misc. images (i.e. obtainable items, or animatable blocks like lava/water)
+
+	// Draw stuff in map render texture and "save it" (display it)
+	MAPRENDER.display();
+
+	// Create the main character's sprite
+	sf::Texture HeroTexture;
+	if (MainChar.getImage() == "") {
+		cout << endl << "[World] Error: Main character image not set" << endl;
+		return "Error";
+	}
+	if (!HeroTexture.loadFromFile("img/characters/" + MainChar.getImage())) {
+		cout << endl << "[World] Error: " << MainChar.getImage() << " failed to load" << endl;
+		return "Error";
+	}
+	sf::Sprite HeroSprite(HeroTexture);
+	HeroSprite.setPosition( MainCharacterPos.x, MainCharacterPos.y );
+
+	// TODO: Draw NPC sprite(s)
+
+	// Animate the main char image to simulate movement
+	animateChar(&HeroSprite, &MainChar);
+
+	// TODO: Animate NPC sprite movement(s)
+
+	// Clear window
+	WINDOW->clear();
+
+	// Draw map texture and hero to window
+	sf::Sprite mapImgSprite(MAPRENDER.getTexture());
+	WINDOW->draw(mapImgSprite);
+	WINDOW->setView(VIEW);
+	WINDOW->draw(HeroSprite);
+
+	// TODO: Draw NPC sprite(s) to window
+
+	// Draw HUD elements: World Name, Minimap, etc.
+	// sf::Texture worldInfoTexture;
+	// if (!worldInfoTexture.loadFromFile("img/")) {
+	// 	printf("[World] Error: World info texture \"%s\" failed to load\n", "img/");
+	// 	return "Error";
+	// }
+
+
+	// Event processing
+	sf::Event event;
+	while (WINDOW->pollEvent(event)) {
+		if (event.type == sf::Event::Closed) {
+			return "Quitting";
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
+			return "Paused";
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {	// Launch interaction menu
+			return "Interact";
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+			MainChar.move(&DATA, Left);
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+			MainChar.move(&DATA, Right);
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+			MainChar.move(&DATA, Down);
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+			MainChar.move(&DATA, Up);
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::I)) {	// Launch Inventory menu
+			return "Inventory";
+		}
+	}
+
+	// Set main character's context
+	setContext();
+
+	// Display
+	WINDOW->display();
+	return "";
+}
+string World::getName () {
+	return DATA.getName();
+}
+string World::getMusic () {
+	return musicFile;
+}
+string World::getDest () {
+	return DESTINATION;
+}
+string World::getDestSpawn () {
+	return DESTINATIONSPAWN;
+}
+Player* World::getMainCharPtr () {
+	return &MainChar;
+}
+sf::View* World::getView () {
+	return &VIEW;
+}
+sf::Texture* World::getMap () {
+	return &MAP;
+}
+sf::RenderTexture* World::getMapRender () {
+	return &MAPRENDER;
+}
+Context* World::getContextPtr () {
+	return &MainCharContext;
+}
+vector<Doorway>* World::getDoorwayPtr () {
+	return &DOORWAY;
+}
+Interaction World::interact (int cid) {
+	Interaction temp;
+	bool canPerformAction = false;
+	int action = static_cast<int>(MainCharContext.getActionPtr()->at(cid));
+	int target = static_cast<int>(MainCharContext.getActionObjectPtr()->at(cid));
+	int eid = MainCharContext.getElemIdPtr()->at(cid);
+	TileCoord targetLocation = MainCharContext.getObjectLocationPtr()->at(cid);
+
+	// Check vector bounds
+	if (cid < 0 || cid >= MainCharContext.size()) {
+		printf("[World] Context access bounds exceeded (invalid index \"%d\")\n", cid);
+		return temp;
+	}
+
+	printf("[World] cid %d, action %d to target %d @ eid %d\n", cid, action, target, eid);	// debug
+
+	// Check action conditions (i.e. determine if the player has the ability to perform the requested action on the indicated object; if so, populate the interaction with the relevant data and return, otherwise, return a "nulled interaction")
+	switch (action) {
+		case AT_UNDEFINED:
+			// Do nothing...
+			break;
+		case AT_ENTER:
+			switch (target) {
+				case MO_UNKNOWN:
+					// Do nothing...
+					break;
+				case MO_DOORWAY: {
+					// Determine which door the player is interacting with, using context data's location
+					int target_x = targetLocation.x;
+					int target_y = targetLocation.y;
+					for (int k = 0; k < DOORWAY.size(); k++) {
+						int x = DOORWAY[k].getLocation().x;
+						int y = DOORWAY[k].getLocation().y;
+
+						// If DOORWAY[k]'s location matches the targetLocation, then the character's context indicates that DOORWAY[k] is the desired door to perform the action upon
+						if (target_x == x && target_y == y) {
+							// Check if the doorway is locked; if not, allow the player to "enter" through the doorway
+							if (!DOORWAY[k].isLocked()) canPerformAction = true;
+
+							// If it is locked, check that the player has the correct key in inventory to unlock it
+							else if (getMainCharPtr()->getInventoryPtr()->hasKey(DOORWAY[k].doorName)) canPerformAction = true;
+							break;
+						}
+					}
+
+					break;
+				}
+				case MO_TRAVELPOINT:
+					/* TODO */
+					break;
+				default:
+					printf("[World] Invalid MapObject associated with ActionType \"AT_ENTER\"\n");
+					break;
+			}
+			break;
+		case AT_EXAMINE:
+			/* TODO */
+			break;
+		case AT_PICKUP:
+			/* TODO */
+			break;
+		default:
+			printf("[World] Unrecognized ActionType\n");
+			break;
+	}
+
+	// If player is able to perform the "action" with the "target", populate temp with context data; else leave it as a "nulled interaction"
+	if (canPerformAction) {
+		temp.action = static_cast<ActionType>(action);
+		temp.actionStr = MainCharContext.getActionStringPtr()->at(cid);
+		temp.actionDesc = MainCharContext.getDescriptionPtr()->at(cid);
+		temp.target = static_cast<MapObject>(target);
+		temp.cid = cid;
+		temp.eid = eid;
+	}
+
+	return temp;
+}
+
+void World::setContext () {	// keep track of all doorways, item drops, chests, etc. that the player can interact with (in the current frame)
+	// Clear context from previous frame
+	MainCharContext.clear();
+
+	// Keep track of all doorways within range
+	for (int i = 0; i < DOORWAY.size(); i++) {
+		// if Door is not in range, skip
+		if (!DOORWAY[i].inRange(MainChar.getLocation())) continue;
+		
+		// else add it to the main character's context
+		// printf("[World] %s in range!\n", DOORWAY[i].doorName.c_str());	// debug
+		MainCharContext.add(AT_ENTER, MO_DOORWAY, DOORWAY[i].getLocation(), i, DOORWAY[i].doorName);
+	}
+
+	/* TODO: */
+	// Keep track of all other interactable objects, etc.
+
+	return;
+}
 bool World::parseData (string str) {
 	/*
-		Data files will be formatted like so:
-		name:[Name of Map]\n
-		size:[Size of Map]\n
-		spawn:[Spawn Point Data 0]\n
-		spawn:[Spawn Point Data 1]....\n
-		coord:[Coord Data 0]\n
-		coord:[Coord Data 1]....\n
-		end:end
-
-		Name Data will be formatted like so:
-		name:[alphanumeric name with or without spaces]\n
-
-		Size Data will be formatted like so:
-		size:[xPixels]x[yPixels]\n
-
-		Spawn Point Data (each map will have at least one spawn tile where the player spawns) will be formatted like so:
-		spawn:[Alphanumeric Spawn Point Name with underscores as space chars] [xTileCoord] [yTileCoord]\n
-
-		Coord Data will be formatted like so:
-		coord:[xTileCoord] [yTileCoord] p[passability is 0 or 1]\n
+		See Map data readme for data details
 	*/
 	string header = "";
 	vector <string> data;
 
 	// Grab the header
+	// printf("[World] \tProcessing data \"%s\" (%d chars)", str.c_str(), static_cast<int>(str.length()));	// debug
 	int i;
 	bool colonDetected = false;
 	for (i = 0; i < str.length(); i++) {
@@ -423,9 +570,10 @@ bool World::parseData (string str) {
 		}
 	}
 	if (!colonDetected) {
-		cout << endl << "[World] Error: Invalid data detected" << endl;
+		cout << endl << "[World] \tError: Invalid data detected" << endl;
 		return false;
 	}
+	// printf("\tHeader - %s\n", header.c_str());	// debug
 
 	// Grab the data
 	i++;
@@ -437,15 +585,17 @@ bool World::parseData (string str) {
 		} else if (i == str.length() - 1) {	// else if current char is the last in the string
 			tempdata += str[i];	// add last char
 			data.push_back(tempdata);
+			// printf("[World] adding last \"%c\" (char %d) - tempdata:%d\n", str[i], i, static_cast<int>(tempdata.length()));	// debug
 		} else {
 			tempdata += str[i];
+			// printf("[World] adding \"%c\" (char %d) - tempdata:%d\n", str[i], i, static_cast<int>(tempdata.length()));	// debug
 		}
 	}
 
 	// Handle adding data
 	if (header == "name") {		// Load map name
 		string tempstring = "";
-		if (data.size() > 1) {
+		if (data.size() > 1) {	// if name longer than 1 word, concat data to single string
 			for (int k = 0; k < data.size(); k++) {
 				if (k > 0) {
 					tempstring += " ";
@@ -455,10 +605,11 @@ bool World::parseData (string str) {
 		} else if (data.size() == 1) {
 			tempstring = data[0];
 		} else {
-			cout << endl << "[World] Error: Data file missing name parameter" << endl;
+			cout << endl << "[World] \tError: Data file missing name parameter" << endl;
 			return false;
 		}
 
+		printf("[World] \tLoading Map \"%s\"\n", tempstring.c_str());
 		DATA.setName(tempstring);
 	} else if (header == "size") {		// Load map pixel dimensions
 		string temp = data[0];
@@ -473,19 +624,20 @@ bool World::parseData (string str) {
 		}
 
 		if (!dividerDetected) {
-			cout << endl << "[World] Error: Invalid size parameter format" << endl;
+			cout << endl << "[World] \tError: Invalid size parameter format" << endl;
 			return false;
 		} else if (divider == 0 || divider == temp.length() - 1) {
-			cout << endl << "[World] Error: Invalid size parameter" << endl;
+			cout << endl << "[World] \tError: Invalid size parameter" << endl;
 			return false;
 		}
 
 		string xstr = temp.substr(0, divider);
 		string ystr = temp.substr(divider + 1);
+		printf("[World] \tSizing map to \"%sx%s\"\n", xstr.c_str(), ystr.c_str());	// debug
 		DATA.setSize( atoi(xstr.c_str()), atoi(ystr.c_str()) );
 	} else if (header == "spawn") {		// Load map spawn point(s)
 		if (data.size() != 3) {
-			cout << endl << "[World] Error: Invalid spawn point data" << endl;
+			cout << endl << "[World] \tError: Invalid spawn point data" << endl;
 			return false;
 		}
 
@@ -493,12 +645,16 @@ bool World::parseData (string str) {
 		string spawnX = data[1];
 		string spawnY = data[2];
 
+		printf("[World] \tLoading Spawn point \"%s\"\n", spawnPointName.c_str());	// debug
 		SpawnPoint newSpawnPoint (spawnPointName, atoi(spawnX.c_str()), atoi(spawnY.c_str()));
 
 		SPAWNPOINT.push_back(newSpawnPoint);
+	} else if (header == "music") {
+		printf("[World] \tLoading Map music \"%s\"\n", data[0].c_str());	//debug
+		musicFile = data[0];
 	} else if (header == "coord") {		// Load map coordinate data
 		if (data.size() != 3) {
-			cout << endl << "[World] Error: Invalid coord data" << endl;
+			cout << endl << "[World] \tError: Invalid coord data" << endl;
 			return false;
 		}
 
@@ -507,12 +663,69 @@ bool World::parseData (string str) {
 		string canPass = data[2];
 
 		DATA.setPassable( atoi(xTileCoord.c_str()), atoi(yTileCoord.c_str()), static_cast<bool>( atoi(canPass.c_str()) ) );
+	} else if (header == "row") {	// Load a series of coordinate data
+		// Check if invalid parsing occurred
+		if (data.size() != 2) {
+			cout << endl << "[World] \tError: Invalid cooridnate series data" << endl;
+			return false;
+		}
+
+		// Acquire row number
+		int yTileCoord = atoi(data[0].c_str());
+		int xTileCoord;
+
+		// Interperet each character in the tile row
+		string temp = data[1];
+		// printf("row:%s (%d chars)\n", data[0].c_str(), static_cast<int>(temp.length()));	// debug
+		for (xTileCoord = 0; xTileCoord < temp.length(); xTileCoord++) {
+			// Acquire information about a tile
+			// printf("xTileCoord: %d ", xTileCoord);	// debug
+			Tile k = tileindex->tile(temp[xTileCoord]);
+			// cout << "[World] Tile Data: " << k.key << " " << k.id << " " << k.name << " " << k.passable << " " << k.height << endl;	// debug
+
+			// Store passability data for the current tile
+			DATA.setPassable(xTileCoord, yTileCoord, k.passable);
+			// printf("[World] Setting passability\n");	// debug
+
+			/* TODO: */
+			// Store name data for the current tile
+			// Store world height data for the current tile
+			// Store action data for the current tile
+		}
+	} else if (header == "doorway") {
+		// Check for correct amount of data
+		if (data.size() != 6) {
+			printf("\n[World] \tError: Invalid doorway data\n");	// debug
+			return false;
+		}
+
+		// Acquire Doorway's coordinates and destination info
+		string doorName = data[0];
+		char doorTileKey = data[1][0];
+		int doorX = atoi(data[2].c_str());
+		int doorY = atoi(data[3].c_str());
+		string destMap = data[4];
+		string destSpawnPointName = data[5];
+		string doorTileFileName = tileindex->tile(doorTileKey).filename;
+		// printf("[World] \tDoorway \"%s\", key:%c, file:%s, coord:(%d,%d), dest:%s @%s\n", doorName.c_str(), doorTileKey, doorTileFileName.c_str(), doorX, doorY, destMap.c_str(), destSpawnPointName.c_str());	// debug
+
+		// Store the doorway's data
+		Doorway tempDoorway(doorName, destMap, doorX, doorY, destSpawnPointName, doorTileFileName);
+		// printf("[World] \tDoorway \"%s\", file:%s, coord:(%d,%d), dest:%s @%s\n", tempDoorway.doorName.c_str(), tempDoorway.filename.c_str(), tempDoorway.x, tempDoorway.y, tempDoorway.destMap.c_str(), tempDoorway.destSpawnName.c_str());	// debug
+		DOORWAY.push_back(tempDoorway);
 	} else if (header == "end") {
 		return true;
 	} else {
-		cout << endl << "[World] Error: Invalid header was read, aborting" << endl;
+		cout << endl << "[World] \tError: Invalid header was read, aborting" << endl;
 		return false;
 	}
 
 	return true;
+}
+bool World::adjacent (TileCoord a, TileCoord b) {
+	// Apply the distance formula
+	double distance = getDistance(a, b);
+
+	if (distance == 1.0) return true;	// if the blocks are less than 2 blocks apart, return true
+	else return false;
 }

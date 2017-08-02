@@ -3,13 +3,17 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include <fstream>	//open(), eof()
-#include <string>	//getline()
-#include <vector>
-#include <cstdlib>	//atoi()
-#include "Character.h"
-#include "Utilities.h"	//Position, TileCoord, SpawnPoint, Move, Direction
+#include <fstream>	// open(), eof()
+#include <string>	// getline()
+#include <vector>	// vector
+#include <cstdlib>	// atoi()
+#include "Character.h"	// Player
+#include "Utilities.h"	// Position, TileCoord, SpawnPoint, Move, Direction, Context
+#include "Interactions.h"	// Interaction
+#include "Tiles.h"	// TileIndex
 using namespace std;
+
+#define TILEDIR "maps/tiles/"
 
 /*
 	World.h: Software to rule the world! (Loads worlds, handles tile/object collision, handles character movement)
@@ -30,34 +34,75 @@ class World {
 		3.> Set the main character's animation image with setMainCharImage()
 		4.> Set a location for spawn with setLocation()
 	*/
+	/*
+		After every map change, the following private variables are changed (in no particular order):
+		1.> MAPRENDER
+		2.> MAP
+		3.> VIEW (?)
+		4.> DATA
+		5.> WORLDNAME (?)
+		6.> DESTINATION
+		7.> DESTINATIONSPAWN
+		8.> musicFile
+		9.> SPAWNPOINT
+		10.> DOORWAY
+	*/
 public:
 	World();
 	World(sf::RenderWindow*);	// World object taking a pointer to the main window
+	~World();	// destructor
 
 	void setWorldName(string);	// Set the name of the world (not the map name)
 	void setWindow(sf::RenderWindow*);	// Set the window pointer
-	bool setLocation(int xtile = -1, int ytile = -1);	// Set's the player's map location in tiles; defaults to the first spawn point of a map
+	bool setLocation(int xtile = -1, int ytile = -1);	// Sets the player's map location in tiles; defaults to the first spawn point of a map
+	bool setSpawn(string SpawnPointName);	// Sets the player's map location using the spawn name instead of coordinates
+	void setDest(string dst);	// Sets "DESTINATION"
+	void setDestSpawn(string dstspn);	// Sets "DESTINATIONSPAWN"
 	bool loadMap(string);	// Load a map image; takes the name of the file (should be stored in maps/img); returns true on successful load
 	bool loadData(string);	// Load a map coord data file; takes the name of the file (should be stored in maps/data); returns true on successful load
+	bool loadTiles(string);	// Load the Tile Index file specified by the string path; returns true on successful load
+	void animateChar(sf::Sprite* charToAnimate, Player* yourCharacter);	// Animates character movement
 	
-	string Show();	// Show the current world view on screen; returns a string of the requested state
+	string Show();		// Show the current world view on screen; returns a string of the requested state
 	string getName();	// Get the world's name
+	string getMusic();	// Get the world's music filename (must be stored in audio)
+	string getDest();	// Returns "DESTINATION"
+	string getDestSpawn();	// Returns "DESTINATIONSPAWN"
 	Player* getMainCharPtr();	// Returns a pointer to the main character
+	sf::View* getView();	// Returns ptr to the world's current view "VIEW"
+	sf::Texture* getMap();	// Returns ptr to the map texture "MAP"
+	sf::RenderTexture* getMapRender();	// returns ptr to the map render texture "MAPRENDER"
+	Context* getContextPtr();	// returns a pointer to "MainCharContext"
+	vector<Doorway>* getDoorwayPtr();	// returns a pointer to "DOORWAY"
+	Interaction interact(int contextID);	// returns the interaction associated with the context action data in "contextID"; if either the contextID exceeds the bounds of Context's data vectors or the player is not able to perform the action, returns an "Nulled Interaction" (see Interactions.h)
 
 private:
-	void animateChar(sf::Sprite* charToAnimate, Player* yourCharacter);	// Animates character movement
+	void setContext();		// compiles data on all interactable objects within interaction range of the Main Character
 	bool parseData(string);	// Returns true on successful parsing and writing of data
+	bool adjacent(TileCoord a, TileCoord b);	// Returns true if the two tile coordinates are adjacent (i.e. next to each other vertically/horizontally, NOT diagonally)
 
+	// SFML data
 	sf::RenderWindow* WINDOW;
 	sf::RenderTexture MAPRENDER;
 	sf::Texture MAP;
 	sf::View VIEW;
-	string WORLDNAME;
-	vector <SpawnPoint> SPAWNPOINT;	// A vector of player entry points in a map
+	
+	// Map Data
 	MapData DATA;
+	string WORLDNAME;
+	string DESTINATION;	// controls which map to spawn to during a map change (i.e. in GameState "ChangingMap")
+	string DESTINATIONSPAWN;	// controls which spawn point to spawn in during a map change
+	TileIndex* tileindex;
+	string musicFile;
 	// sf::Clock clk;
+
+	// Spawnables
+	vector <SpawnPoint> SPAWNPOINT;	// A vector of player entry points in a map
+	vector <Doorway> DOORWAY;	// A vector of all doorways within the map
 
 	// Characters
 	Player MainChar;
 	
+	// Characters' Interaction Context
+	Context MainCharContext;	// a struct to keep track of all objects around the player in interaction range
 };
