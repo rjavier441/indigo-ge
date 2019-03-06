@@ -29,23 +29,30 @@ $(OBJDEPS): main.o
 main.o: main.cpp
 	$(CC) -c -o $(OBJDIR)$@ $^
 
+# Clean project
+clean: pushable
+
 # Remove object files
 objless:
 	# echo "making objless"
-	rm ./obj/*
+	rm -f ./obj/*
 
 # Remove gch files
 gchless:
 	# echo "making gchless"
-	rm ./lib/*.gch
+	rm -f ./lib/*.gch
 
 # Cleanup for git pushing
 pushable:
 	# echo "making pushable"
-	rm ./obj/*
-	rm ./lib/*.gch
-	rm ./game
+	rm -f ./obj/*
+	rm -f ./lib/*.gch
+	rm -f ./game
 
+# Setup relevant directories
+setup:
+	@echo "Creating core project directories..."
+	mkdir ./obj
 
 # MAKE RECIPES ($^ = $(OBJ) (right of ":"))
 # game: $(OBJ)
