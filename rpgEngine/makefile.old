@@ -1,6 +1,0 @@
-CC=g++
-EXENAME=game
-
-game: main.cpp lib/*
-	$(CC) -c main.cpp lib/*
-	$(CC) *.o -o $(EXENAME) -lsfml-system -lsfml-window -lsfml-graphics -lsfml-audio

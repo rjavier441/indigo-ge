@@ -1,25 +1,17 @@
-# README #
+# Indigo
+A 2D RPG Engine
 
-### What is this repository for? ###
+Current Version: Alpha (v0.0.0)
 
-* Summary
-    * Indigo: a SFML-based RPG engine
-* Version 0.0
-    * Currently making an experimental game to learn SFML game dev. 0% progress on the engine itself...
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+---
 
-### How do I get set up? ###
-* Setup
-    * Currently only tested/played on Linux
-    * Install SFML (I'm using v2.3.2 in Ubuntu Linux). For help, see http://www.sfml-dev.org/tutorials/2.3/
-    * Install a C++ compiler (in Linux, I use g++ v4.8.4)
-### Contribution guidelines ###
+## Table of Contents
+- [Setup and Dependencies](#setup-and-dependencies)
+    - [Linux/Mac](#on-linuxmac)
+    - [Windows](#on-windows)
 
-* Writing tests
-* Code review
-* Other guidelines
+---
 
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+## Setup and Dependencies
+This project was built in the Ubuntu Xenial 16.04 LTS Linux environment, and was built using
+- SFML (v2.5.1+)
