@@ -46,6 +46,19 @@ function _checkFileExists() {
   fi
 }
 
+# @function:        _checkCmdExists()
+# @description:     Checks if the given terminal command/utility exists
+#                   (i.e. "which [cmd]").
+# @parameters:      (string) cmd        The command/utility to check for.
+# @returns:         (string) result     1 on success, 0 otherwise.
+function _checkCmdExists() {
+  if [[ -n "$(which $1)" ]]; then
+    echo "1"
+  else
+    echo "0"
+  fi
+}
+
 # @function     _checkTarInstalled()
 # @description  This function checks if GNU tar is installed in your machine.
 # @parameters   n/a
@@ -58,14 +71,4 @@ function _checkTarInstalled() {
   else
     echo "1"
   fi
-}
-
-# @function			_log()
-# @description	This prints a fancy log to the console
-# @parameters		(string) log        The message to show
-# @returns			(n/a)
-function _log() {
-
-  local msg="$1"
-  printf "[ $msg ]\n"
 }
