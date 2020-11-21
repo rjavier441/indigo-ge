@@ -5,9 +5,20 @@
 # @version      v0.0.1
 # @description  This script is a tool intended to automate installation and
 #               deployment of all dependencies for the Indigo project on
-#               Ubuntu/Debian Linux systems. Note: Ensure your line endings are
-#               appropriate for your system's interpreter, otherwise this script
-#               may not run!
+#               Ubuntu/Debian Linux systems. Note: Ensure your line endings
+#               are appropriate for your system's interpreter, otherwise
+#               this script may not run!
+# @notes        *If you are using WSL2, the -t/--test option will NOT be
+#               able to launch a GUI app unless a link is made between
+#               WSL2's X11 and Windows. See the VcXsrv Project:
+#               https://github.com/ArcticaProject/vcxsrv
+#               *Installing VcXsrv might break WSL2's DNS server config, but
+#               a reconfiguration of your /etc/resolv.conf file and a slight
+#               deviation from the VcXsrv DISPLAY modification can fix it.
+#               Here are some helpful links to resolve the issues:
+#               https://gist.github.com/coltenkrauter/608cfe02319ce60facd76373249b8ca6
+#               https://kenny.yeoyou.net/it/2020/09/10/windows-development-environment.html
+#               https://stackoverflow.com/a/63092879/9028285
 
 # @includes
 source res/setup.util.fs.sh
@@ -28,22 +39,22 @@ VERSION="v0.0.1"
 # @returns      n/a
 function _help() {
 
-  echo ""
-  echo "==========================="
-  echo "Indigo System Setup Utility"
-  echo "       ___________"
-  echo "      /__/__|__\__\ "
-  echo "      \ \   |   / / "
-  echo "       \         / "
-  echo "        \ \ | / / "
-  echo "         \     / "
-  echo "          \ | / "
-  echo "           \ / "
-  echo ""
-  echo "for Ubuntu/Debian"
-  echo "$VERSION"
-  echo "==========================="
-  echo ""
+  _log
+  _log "===========================" lightblue
+  _log "Indigo System Setup Utility" primary
+  _log "$VERSION"
+  _log "       ___________" lightblue
+  _log "      /__/__|__\__\ " lightblue
+  _log "      \ \   |   / / " lightblue
+  _log "       \         / " lightblue
+  _log "        \ \ | / / " lightblue
+  _log "         \     / " lightblue
+  _log "          \ | / " lightblue
+  _log "           \ / " lightblue
+  _log ""
+  _log "Ubuntu/Debian" red "for "
+  _log "===========================" lightblue
+  _log ""
   printf "DESCRIPTION\n"
   printf "\tThis utility is used to automatically install dependencies for\n"
   printf "\tIndigo RPG Engine\n"
@@ -55,6 +66,10 @@ function _help() {
   printf "\t\tPrints this help prompt.\n"
   printf "\n\t-V, --verify\n"
   printf "\t\tChecks if you have all the required utilities installed.\n"
+  printf "\n\t-t, --test\n"
+  printf "\t\tTests your SFML installation by compiling and running a test\n"
+  printf "\t\tapp"
+  printf "\n"
   exit 0
 }
 
@@ -174,7 +189,7 @@ function _main() {
 
       # Test app
       _nlog "Starting 'sfml-test.app'..."
-      if [[ $(./sfml-test.app) ]]; then
+      if ./sfml-test.app; then
         _log "OK" success
       else
         _log "FAILED" danger
