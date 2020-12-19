@@ -20,7 +20,7 @@ public:
     virtual ~Testable() {}
 
     // @functions
-    virtual void test() = 0;
+    virtual int test() = 0;
 };
 
 // EOF Testable.hpp

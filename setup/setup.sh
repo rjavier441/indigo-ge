@@ -141,7 +141,8 @@ function _main() {
   local cmd="$1"
   local a1="$2"
   local a2="$3"
-  local totalVerifySteps="5"
+  local totalVerifySteps=""
+  local currentProgress=""
 
   # Determine the command to run
   case "$cmd" in
@@ -204,7 +205,9 @@ function _main() {
     # Verify (checks dependencies and util availability)
     -V|--verify)
 
-      _printProgress 0
+      totalVerifySteps="6"
+      currentProgress="0"
+      _printProgress $((currentProgress * 100 / totalVerifySteps))
       _clearCurrentLine
       _hlog "Verifying CLI utilities..." lightblue
       # # DEBUG
@@ -220,7 +223,9 @@ function _main() {
       else
         _log "OK" success
       fi
-      _printProgress $((1 * 100 / totalVerifySteps))
+      currentProgress=$((currentProgress + 1))
+      _printProgress $((currentProgress * 100 / totalVerifySteps))
+      sleep 1
 
       # Check if make is installed
       _clearCurrentLine
@@ -232,7 +237,23 @@ function _main() {
       else
         _log "OK" success
       fi
-      _printProgress $((3 * 100 / totalVerifySteps))
+      currentProgress=$((currentProgress + 1))
+      _printProgress $((currentProgress * 100 / totalVerifySteps))
+      sleep 1
+
+      # Checks if scons is installed
+      _clearCurrentLine
+      _nlog "Checking for scons..."
+      if [[ "$(_checkAptInstalled scons)" == "0" ]]; then
+        _log "FAILED" danger
+        _log "Your system does not have scons installed!" red
+        exit 1
+      else
+        _log "OK" success
+      fi
+      currentProgress=$((currentProgress + 1))
+      _printProgress $((currentProgress * 100 / totalVerifySteps))
+      sleep 1
 
       # Check if TAR is installed
       _clearCurrentLine
@@ -244,7 +265,9 @@ function _main() {
       else
         _log "OK" success
       fi
-      _printProgress $((4 * 100 / totalVerifySteps))
+      currentProgress=$((currentProgress + 1))
+      _printProgress $((currentProgress * 100 / totalVerifySteps))
+      sleep 1
 
       # Check if G++ is installed
       _clearCurrentLine
@@ -256,7 +279,9 @@ function _main() {
       else
         _log "OK" success
       fi
-      _printProgress $((4 * 100 / totalVerifySteps))
+      currentProgress=$((currentProgress + 1))
+      _printProgress $((currentProgress * 100 / totalVerifySteps))
+      sleep 1
 
       # Checks if apt has SFML Dev Library installed
       _clearCurrentLine
@@ -269,7 +294,9 @@ function _main() {
       else
         _log "OK" success
       fi
-      _printProgress $((5 * 100 / totalVerifySteps))
+      currentProgress=$((currentProgress + 1))
+      _printProgress $((currentProgress * 100 / totalVerifySteps))
+      sleep 1
 
       # End progress bar
       _clearCurrentLine

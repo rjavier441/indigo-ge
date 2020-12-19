@@ -12,7 +12,7 @@
 
 // Includes
 #include <cstdio>
-#include "WindowManager.h"
+#include "WindowManager.hpp"
 using namespace std;
 
 // @ctor
@@ -50,11 +50,12 @@ WindowManager* WindowManager::getInstance() {
 // @description     This function is a test method inherited from the Testable
 //                  abstract class
 // @parameters      n/a
-// @returns         n/a
-void WindowManager::test() {
+// @returns         (int) zero          Always returns zero.
+int WindowManager::test() {
 
     // Test
     printf( "Hello %s!", "World" );
+    return 0;
 }
 
 // EOF WindowManager.cpp

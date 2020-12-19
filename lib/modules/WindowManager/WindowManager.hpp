@@ -12,7 +12,7 @@
 #pragma once
 
 // Includes
-#include "../../interface/Testable/Testable.hpp"
+#include "../../interface/Testable.hpp"
 
 // @class           WindowManager
 // @description     This singleton class is used by the game engine's main
@@ -21,7 +21,7 @@ class WindowManager : public Testable {
 public:
     ~WindowManager();
     static WindowManager* getInstance();
-    void test();
+    int test();
 private:
     WindowManager();
     static WindowManager* wm;
