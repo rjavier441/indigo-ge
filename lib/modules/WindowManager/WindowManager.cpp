@@ -15,6 +15,9 @@
 #include "WindowManager.hpp"
 using namespace std;
 
+// @statics
+WindowManager* WindowManager::wm;
+
 // @ctor
 WindowManager::WindowManager() {
 
