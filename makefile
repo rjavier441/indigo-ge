@@ -1,13 +1,13 @@
-# PROJECT:         Indigo
-# Author:          R. Javier
-# File:            makefile
-# Created:         March 23, 2019
-# Last Modified:   March 23, 2019
+# PROJECT:          Indigo
+# Author:           R. Javier
+# File:             makefile
+# Created:          2019-03-23
+# Last Modified:    2020-12-28
 # Details:
-#                  This file contains definitions for error codes that pertain
-#                  to errors or warnings in the game engine
+#										This file contains comprises the Indigo build system for
+# 									Ubuntu Linux systems.
 # Dependencies:
-#                  n/a
+#										n/a
 
 # ANSI Escape Sequence (Echo Color Scheme) Shortcuts
 AES_RESET = \e[0m
@@ -36,7 +36,8 @@ CC = g++
 CFLAGS = -I$(DIR_CLASS) -I$(DIR_OBJ) -I$(DIR_SRC) -I$(DIR_IFACE)
 REQS = -lsfml-system -lsfml-window -lsfml-graphics -lsfml-audio
 EXENAME = game.exe
-TESTNAME = test.exe
+TESTNAME = unittests.exe
+TESTMODE = no
 
 # File Sets
 MODULE_FILES = $(shell find $(DIR_MODULE) -regex '.*.\(cpp\|hpp\|h\)')
@@ -46,21 +47,33 @@ CLASS_FILES = $(shell find $(DIR_CLASS) -regex '.*.\(cpp\|hpp\|h\)')
 TEST_FILES = $(shell find $(DIR_TEST) -regex '.*.\(cpp\|hpp\|h\)')
 
 # BEGIN Make Rules
-# The default; runs "game" make rules first, then unsets the compilation
-# directories as cleanup
+# The default rule; compiles and creates the game executable
+game: compile_prologue compile_game collect_objects link_objects compile_epilogue
+
+# Unsets the compilation directories as cleanup
 compile_epilogue:
 	@echo "$(AES_THEME_PRIMARY)[ Cleaning Up ]$(AES_RESET)"
-	@echo "$(AES_TXGREEN_BGBLACK)[ Done ]$(AES_RESET)"
+	@echo "$(AES_THEME_SUCCESS)[ Done ]$(AES_RESET)"
 
 # Compiles the game
-# game: compile_prologue interface class
-game: compile_prologue
+compile_game:
+	@echo "$(AES_THEME_PRIMARY)[ Gathering Game Files ]$(AES_RESET)"
+
+	@# DEBUG
+	@echo "module files: $(MODULE_FILES)"
+	@echo "interface files: $(IFACE_FILES)"
+	@echo "class files: $(CLASS_FILES)"
+	@echo "test files: $(TEST_FILES)"
+
 	@echo "$(AES_THEME_PRIMARY)[ Compiling Game ]$(AES_RESET)"
-	@echo "$(AES_TXGREEN_BGBLACK)[ Done ]$(AES_RESET)"
+	$(CC) -c -Wall main.cpp $(MODULE_FILES) $(IFACE_FILES) $(CLASS_FILES) $(SRC_FILES)
+
+	@echo "$(AES_THEME_SUCCESS)[ Done ]$(AES_RESET)"
 
 # Compiles the unit tests
 compile_tests:
-	@echo "$(AES_THEME_PRIMARY)[ Gathering Source Files ]$(AES_RESET)"
+	$(TESTMODE := yes)
+	@echo "$(AES_THEME_PRIMARY)[ Gathering Test Files ]$(AES_RESET)"
 
 	@# DEBUG
 	@echo "module files: $(MODULE_FILES)"
@@ -71,28 +84,32 @@ compile_tests:
 	@echo "$(AES_THEME_PRIMARY)[ Compiling Tests ]$(AES_RESET)"
 	$(CC) -c -Wall $(MODULE_FILES) $(IFACE_FILES) $(CLASS_FILES) $(TEST_FILES)
 
-	@echo "$(AES_TXGREEN_BGBLACK)[ Done ]$(AES_RESET)"
+	@echo "$(AES_THEME_SUCCESS)[ Done ]$(AES_RESET)"
 
-# Collects test object files
-collect_tests:
-	@echo "$(AES_THEME_PRIMARY)[ Collecting Test Objects ]$(AES_RESET)"
+# Collects object files
+collect_objects:
+	@echo "$(AES_THEME_PRIMARY)[ Collecting Objects ]$(AES_RESET)"
 
 	$(shell mv *.o $(DIR_OBJ))
 
-	@echo "$(AES_TXGREEN_BGBLACK)[ Done ]$(AES_RESET)"
+	@echo "$(AES_THEME_SUCCESS)[ Done ]$(AES_RESET)"
 
 # Sets up the compile environment (i.e. relevant directories for compilation)
 compile_prologue:
 	@echo "$(AES_THEME_PRIMARY)[ Initializing Compile Environment ]$(AES_RESET)"
 	@mkdir -p $(DIR_BUILD)
 	@mkdir -p $(DIR_OBJ)
-	@echo "$(AES_TXGREEN_BGBLACK)[ Done ]$(AES_RESET)"
+	@echo "$(AES_THEME_SUCCESS)[ Done ]$(AES_RESET)"
 
 # Links generated objects
 link_objects:
 	@echo "$(AES_THEME_PRIMARY)[ Linking Objects ]$(AES_RESET)"
+ifeq ($(TESTMODE),yes)
 	$(CC) $(DIR_OBJ)/* -o $(TESTNAME) $(REQS)
-	@echo "$(AES_TXGREEN_BGBLACK)[ Done ]$(AES_RESET)"
+else
+	$(CC) $(DIR_OBJ)/* -o $(EXENAME) $(REQS)
+endif
+	@echo "$(AES_THEME_SUCCESS)[ Done ]$(AES_RESET)"
 
 # Manually cleans up the compile environment and precompiled headers (.gch)
 clean:
@@ -101,10 +118,11 @@ clean:
 	@rm -fr $(DIR_BUILD)
 	@rm -fr $(shell find . -name '*.gch')
 	@rm -fr ./*.o
-	@echo "$(AES_TXGREEN_BGBLACK)[ Done ]$(AES_RESET)"
+	@rm -fr ./*.exe
+	@echo "$(AES_THEME_SUCCESS)[ Done ]$(AES_RESET)"
 
 # Compiles the unit tests
-test: compile_prologue compile_tests collect_tests link_objects compile_epilogue
+test: compile_prologue compile_tests collect_objects link_objects compile_epilogue
 # END Make Rules
 
 # EOF makefile

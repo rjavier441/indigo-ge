@@ -11,24 +11,25 @@
 //                  SFML v2.5.1 and above
 
 // Includes
+#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
 #include <cstdio>
+#include <string>
 #include "WindowManager.hpp"
 using namespace std;
 
-// @statics
-WindowManager* WindowManager::wm;
-
 // @ctor
-WindowManager::WindowManager() {
-
-    // Initialize singleton pointer to null
-    wm = NULL;
+WindowManager::WindowManager(string t) {
+    title = t;
 }
 
 // @dtor
 WindowManager::~WindowManager() {
 
-    // Do nothing
+    // Delete instance, if it isn't already null
+    if( wm != nullptr ) {
+        delete wm;
+    }
 }
 
 // @function        getInstance()
@@ -38,27 +39,56 @@ WindowManager::~WindowManager() {
 // @returns         n/a
 WindowManager* WindowManager::getInstance() {
 
-    // Check if an instance already exists
-    if( wm == NULL ) {
+    try {
 
-        // If not, create an instance
-        wm = new WindowManager();
+        // Check if an instance already exists
+        if( wm == nullptr ) {
+
+            // If not, create an instance defaulting to full-screen mode
+            wm = new WindowManager();
+        }
+
+        // Return instance reference
+        return wm;
+    } catch(...) {
+        printf("Error creating WindowManager instance\n");
     }
 
-    // Return instance reference
-    return wm;
+    return nullptr;
 }
 
-// @function        Testable::test()
-// @description     This function is a test method inherited from the Testable
-//                  abstract class
+// @function        openWindow()
+// @description     Creates and opens this instance's window.
 // @parameters      n/a
-// @returns         (int) zero          Always returns zero.
-int WindowManager::test() {
+// @returns         (sf::Window*) window
+//                                      The sf::Window for this instance.
+sf::Window* WindowManager::openWindow() {
 
-    // Test
-    printf( "Hello %s!", "World" );
-    return 0;
+    try {
+        window.create(
+            sf::VideoMode(
+                sf::VideoMode::getDesktopMode().width,
+                sf::VideoMode::getDesktopMode().height
+            ),
+            title,
+            sf::Style::Default
+        );
+
+        return &window;
+    } catch(...) {
+        printf("Error creating window\n");
+    }
+
+    return nullptr;
+}
+
+// @function        getWindow()
+// @description     Gives the user a pointer to the instance's window.
+// @parameters      n/a
+// @returns         (sf::Window*) window
+//                                      The sf::Window for this instance.
+sf::Window* WindowManager::getWindow() {
+    return &window;
 }
 
 // EOF WindowManager.cpp

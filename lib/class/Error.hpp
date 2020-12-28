@@ -13,8 +13,8 @@
 // @enum            ErrorCode
 // @description     This enumeration defines various errors/warnings that can
 //                  occur while the game engine is running
-enum ErrorCode {
-    NoError
+enum class ErrorCode {
+    Unknown
 };
 
 // EOF Error.hpp

@@ -14,10 +14,13 @@
 
 // Includes
 #include <SFML/Graphics.hpp>
-#include "../lib/class/Error/Error.hpp"
-#include "../lib/class/GameState/GameState.hpp"
-#include "../lib/module/WindowManager/WindowManager.hpp"
+#include "./lib/class/Error.hpp"
+#include "./lib/class/GameState.hpp"
+#include "./lib/modules/WindowManager/WindowManager.hpp"
 using namespace std;
+
+// @statics
+WindowManager* WindowManager::wm = nullptr;
 
 // @function        main()
 // @description     This function is the main routine of the game engine
@@ -26,10 +29,22 @@ using namespace std;
 //                                  passed to this function
 int main( int argc, char* argv[] ) {
 
-    // Load Essentials
-    WindowManager* wm = WindowManager::getInstance();
+    // Create manageable window
+    sf::Window* window = WindowManager::getInstance()->openWindow();
 
-    return ErrorCode::NoError;
+    // Main loop
+    while( window->isOpen() ) {
+        sf::Event event;
+        while( window->pollEvent(event) ) {
+
+            // On close
+            if( event.type == sf::Event::Closed ) {
+                window->close();
+            }
+        }
+    }
+
+    return 0;
 }
 
 // EOF main.cpp

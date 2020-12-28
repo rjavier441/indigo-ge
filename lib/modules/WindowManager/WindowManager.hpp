@@ -12,19 +12,25 @@
 #pragma once
 
 // Includes
-#include "../../interface/Testable.hpp"
+#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
+#include <string>
+using namespace std;
 
 // @class           WindowManager
 // @description     This singleton class is used by the game engine's main
 //                  routine to manage the window throughout the game's duration
-class WindowManager : public Testable {
+class WindowManager {
 public:
-    ~WindowManager();
     static WindowManager* getInstance();
-    int test();
+    sf::Window* openWindow();
+    sf::Window* getWindow();
 private:
-    WindowManager();
     static WindowManager* wm;
+    ~WindowManager();
+    WindowManager(string t = "Indigo Game");
+    sf::Window window;
+    string title;
 };
 
 // EOF WindowManager.hpp

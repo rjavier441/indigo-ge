@@ -12,8 +12,9 @@
 #include "../lib/modules/WindowManager/WindowManager.hpp"
 using namespace std;
 
+// @statics
+WindowManager* WindowManager::wm = NULL;
+
 TEST_CASE( "WindowManager initializes and returns an instance", "[WindowManager]" ) {
-  WindowManager* temp = WindowManager::getInstance();
-  // REQUIRE( WindowManager::getInstance() != NULL );
-  REQUIRE( temp->test() == 0 );
+  REQUIRE( WindowManager::getInstance() != NULL );
 }

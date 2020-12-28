@@ -13,7 +13,7 @@
 // @enum            GameState
 // @description     This enumerator defines various different
 //                  states that the game can be in
-enum GameState {
+enum class GameState {
     Error,
     Loading,
     Saving,
