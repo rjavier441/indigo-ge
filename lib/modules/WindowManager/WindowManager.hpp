@@ -23,14 +23,17 @@ using namespace std;
 class WindowManager {
 public:
     static WindowManager* getInstance();
-    sf::Window* openWindow();
+    sf::Window* openWindow(string t = "Indigo Game", int w = 800, int h = 600);
     sf::Window* getWindow();
 private:
     static WindowManager* wm;
+    static bool windowExists;
     ~WindowManager();
     WindowManager(string t = "Indigo Game");
     sf::Window window;
     string title;
+    int width;
+    int height;
 };
 
 // EOF WindowManager.hpp

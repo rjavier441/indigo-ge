@@ -21,6 +21,9 @@ using namespace std;
 // @ctor
 WindowManager::WindowManager(string t) {
     title = t;
+    windowExists = false;
+    width = 0;
+    height = 0;
 }
 
 // @dtor
@@ -59,21 +62,27 @@ WindowManager* WindowManager::getInstance() {
 
 // @function        openWindow()
 // @description     Creates and opens this instance's window.
-// @parameters      n/a
+// @parameters      (~string) t         The window's title.
+//                  (~int) w            The window's width in pixels.
+//                  (~int) h            The window's height in pixels.
 // @returns         (sf::Window*) window
 //                                      The sf::Window for this instance.
-sf::Window* WindowManager::openWindow() {
+sf::Window* WindowManager::openWindow(string t, int w, int h) {
 
     try {
-        window.create(
-            sf::VideoMode(
-                sf::VideoMode::getDesktopMode().width,
-                sf::VideoMode::getDesktopMode().height
-            ),
-            title,
-            sf::Style::Default
-        );
-
+        if( !windowExists ) {
+            windowExists = true;
+            width = w;
+            height = h;
+            title = t;
+            window.create(
+                sf::VideoMode(width, height),
+                title,
+                sf::Style::Default
+            );
+        } else {
+            printf("Window already exists!\n");
+        }
         return &window;
     } catch(...) {
         printf("Error creating window\n");

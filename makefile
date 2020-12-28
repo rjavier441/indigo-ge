@@ -72,7 +72,6 @@ compile_game:
 
 # Compiles the unit tests
 compile_tests:
-	$(TESTMODE := yes)
 	@echo "$(AES_THEME_PRIMARY)[ Gathering Test Files ]$(AES_RESET)"
 
 	@# DEBUG
@@ -97,6 +96,7 @@ collect_objects:
 # Sets up the compile environment (i.e. relevant directories for compilation)
 compile_prologue:
 	@echo "$(AES_THEME_PRIMARY)[ Initializing Compile Environment ]$(AES_RESET)"
+	@echo "$(AES_TXBLUE_BGBLACK)[ TESTMODE: $(TESTMODE) ]$(AES_RESET)"
 	@mkdir -p $(DIR_BUILD)
 	@mkdir -p $(DIR_OBJ)
 	@echo "$(AES_THEME_SUCCESS)[ Done ]$(AES_RESET)"
@@ -104,11 +104,7 @@ compile_prologue:
 # Links generated objects
 link_objects:
 	@echo "$(AES_THEME_PRIMARY)[ Linking Objects ]$(AES_RESET)"
-ifeq ($(TESTMODE),yes)
-	$(CC) $(DIR_OBJ)/* -o $(TESTNAME) $(REQS)
-else
-	$(CC) $(DIR_OBJ)/* -o $(EXENAME) $(REQS)
-endif
+	@if [ "$(TESTMODE)" = "yes" ]; then $(CC) $(DIR_OBJ)/* -o $(TESTNAME) $(REQS); else $(CC) $(DIR_OBJ)/* -o $(EXENAME) $(REQS); fi
 	@echo "$(AES_THEME_SUCCESS)[ Done ]$(AES_RESET)"
 
 # Manually cleans up the compile environment and precompiled headers (.gch)
@@ -122,6 +118,7 @@ clean:
 	@echo "$(AES_THEME_SUCCESS)[ Done ]$(AES_RESET)"
 
 # Compiles the unit tests
+test: TESTMODE := yes
 test: compile_prologue compile_tests collect_objects link_objects compile_epilogue
 # END Make Rules
 

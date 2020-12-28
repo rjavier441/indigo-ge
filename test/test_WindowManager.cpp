@@ -13,8 +13,9 @@
 using namespace std;
 
 // @statics
-WindowManager* WindowManager::wm = NULL;
+WindowManager* WindowManager::wm = nullptr;
+bool WindowManager::windowExists = false;
 
 TEST_CASE( "WindowManager initializes and returns an instance", "[WindowManager]" ) {
-  REQUIRE( WindowManager::getInstance() != NULL );
+  REQUIRE( WindowManager::getInstance() != nullptr );
 }

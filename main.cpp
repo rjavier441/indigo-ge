@@ -21,6 +21,7 @@ using namespace std;
 
 // @statics
 WindowManager* WindowManager::wm = nullptr;
+bool WindowManager::windowExists = false;
 
 // @function        main()
 // @description     This function is the main routine of the game engine
@@ -30,7 +31,7 @@ WindowManager* WindowManager::wm = nullptr;
 int main( int argc, char* argv[] ) {
 
     // Create manageable window
-    sf::Window* window = WindowManager::getInstance()->openWindow();
+    sf::Window* window = WindowManager::getInstance()->openWindow("My Game");
 
     // Main loop
     while( window->isOpen() ) {
