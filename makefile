@@ -47,6 +47,8 @@ CLASS_FILES = $(shell find $(DIR_CLASS) -regex '.*.\(cpp\|hpp\|h\)')
 TEST_FILES = $(shell find $(DIR_TEST) -regex '.*.\(cpp\|hpp\|h\)')
 
 # BEGIN Make Rules
+# Stop if none of 
+
 # The default rule; compiles and creates the game executable
 game: compile_prologue compile_game collect_objects link_objects compile_epilogue
 
@@ -66,7 +68,7 @@ compile_game:
 	@echo "test files: $(TEST_FILES)"
 
 	@echo "$(AES_THEME_PRIMARY)[ Compiling Game ]$(AES_RESET)"
-	$(CC) -c -Wall main.cpp $(MODULE_FILES) $(IFACE_FILES) $(CLASS_FILES) $(SRC_FILES)
+	$(CC) -c -Wall $(MODULE_FILES) $(IFACE_FILES) $(CLASS_FILES) $(SRC_FILES)
 
 	@echo "$(AES_THEME_SUCCESS)[ Done ]$(AES_RESET)"
 

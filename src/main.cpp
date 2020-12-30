@@ -14,26 +14,22 @@
 
 // Includes
 #include <SFML/Graphics.hpp>
-#include "./lib/class/Error.hpp"
-#include "./lib/class/GameState.hpp"
-#include "./lib/modules/WindowManager/WindowManager.hpp"
+#include "../lib/class/Error.hpp"
+#include "../lib/class/GameState.hpp"
+#include "../lib/modules/WindowManager/WindowManager.hpp"
 using namespace std;
-
-// @statics
-WindowManager* WindowManager::wm = nullptr;
-bool WindowManager::windowExists = false;
 
 // @function        main()
 // @description     This function is the main routine of the game engine
 // @parameters      (int) argc      The number of arguments in the arg. vector
 //                  (char*[]) argv  An array of strings commprising the args.
-//                                  passed to this function
+//                                  passed to this function.
 int main( int argc, char* argv[] ) {
 
     // Create manageable window
-    sf::Window* window = WindowManager::getInstance()->openWindow("My Game");
+    sf::Window* window = WindowManager::getInstance().openWindow("My Game");
 
-    // Main loop
+    // Game loop
     while( window->isOpen() ) {
         sf::Event event;
         while( window->pollEvent(event) ) {

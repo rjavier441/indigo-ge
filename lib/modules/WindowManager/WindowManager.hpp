@@ -11,7 +11,7 @@
 //                  SFML v2.5.1 and above
 #pragma once
 
-// Includes
+// @includes
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <string>
@@ -22,18 +22,16 @@ using namespace std;
 //                  routine to manage the window throughout the game's duration
 class WindowManager {
 public:
-    static WindowManager* getInstance();
+    static WindowManager& getInstance();
     sf::Window* openWindow(string t = "Indigo Game", int w = 800, int h = 600);
     sf::Window* getWindow();
+    void setFullscreen(bool);
 private:
-    static WindowManager* wm;
-    static bool windowExists;
-    ~WindowManager();
     WindowManager(string t = "Indigo Game");
+    ~WindowManager();
+    static bool windowExists;
     sf::Window window;
-    string title;
-    int width;
-    int height;
+    bool isFullscreen;
 };
 
 // EOF WindowManager.hpp

@@ -10,7 +10,7 @@
 //                  C++11 and above
 //                  SFML v2.5.1 and above
 
-// Includes
+// @includes
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <cstdio>
@@ -18,46 +18,32 @@
 #include "WindowManager.hpp"
 using namespace std;
 
+// @statics
+bool WindowManager::windowExists = false;
+
 // @ctor
 WindowManager::WindowManager(string t) {
-    title = t;
-    windowExists = false;
-    width = 0;
-    height = 0;
+    isFullscreen = false;
 }
 
 // @dtor
 WindowManager::~WindowManager() {
-
-    // Delete instance, if it isn't already null
-    if( wm != nullptr ) {
-        delete wm;
-    }
+    // Do nothing
 }
 
 // @function        getInstance()
 // @description     This function acquires an instance of the WindowManager
 //                  singleton. It will create one if one doesn't exist yet.
 // @parameters      n/a
-// @returns         n/a
-WindowManager* WindowManager::getInstance() {
+// @returns         (WindowManager&) ref
+//                                      Reference to a static function
+//                                      variable acting as a singleton
+//                                      instance for this class.
+WindowManager& WindowManager::getInstance() {
 
-    try {
-
-        // Check if an instance already exists
-        if( wm == nullptr ) {
-
-            // If not, create an instance defaulting to full-screen mode
-            wm = new WindowManager();
-        }
-
-        // Return instance reference
-        return wm;
-    } catch(...) {
-        printf("Error creating WindowManager instance\n");
-    }
-
-    return nullptr;
+    // Initialize a single instance
+    static WindowManager instance;
+    return instance;
 }
 
 // @function        openWindow()
@@ -72,14 +58,7 @@ sf::Window* WindowManager::openWindow(string t, int w, int h) {
     try {
         if( !windowExists ) {
             windowExists = true;
-            width = w;
-            height = h;
-            title = t;
-            window.create(
-                sf::VideoMode(width, height),
-                title,
-                sf::Style::Default
-            );
+            window.create( sf::VideoMode( w, h ), t, sf::Style::Default );
         } else {
             printf("Window already exists!\n");
         }
@@ -98,6 +77,19 @@ sf::Window* WindowManager::openWindow(string t, int w, int h) {
 //                                      The sf::Window for this instance.
 sf::Window* WindowManager::getWindow() {
     return &window;
+}
+
+// @function        setFullscreen()
+// @description     Controls whether the window is in full-screen mode.
+// @parameters      (bool) active       If true, sets the window dimentions
+//                                      to full-screen mode for the window's
+//                                      currently encapsulating screen.
+// @returns         n/a
+void WindowManager::setFullscreen(bool active) {
+    
+    if( active != isFullscreen ) {} else {
+        printf("");
+    }
 }
 
 // EOF WindowManager.cpp
