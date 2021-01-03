@@ -33,3 +33,6 @@
 
 # VS Code files
 .vscode/*
+
+# FakeIt path file
+test/lib/fakeit/config.txt

@@ -38,9 +38,10 @@ Indigo::ConsoleLogger& Indigo::ConsoleLogger::getInstance() {
 // @function        log()
 // @description     Prints a message
 // @parameters      (string) msg        The message to print.
-//                  (~string) src       (Optional) A message prefix
-//                                      to identify the sender.
-// @returns         n/a
-void Indigo::ConsoleLogger::log(string msg, string src) {
-  printf("%s%s\n", src.c_str(), msg.c_str());
+//                  (~string) prefix    (Optional) A message prefix,
+//                                      useful for identifying the
+//                                      message sender.
+// @returns         (int) length        Length of the printed message.
+int Indigo::ConsoleLogger::log(string msg, string prefix) {
+  return printf("%s%s\n", prefix.c_str(), msg.c_str());
 }

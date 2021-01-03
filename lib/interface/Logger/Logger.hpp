@@ -22,6 +22,6 @@ namespace Indigo {
   class Logger {
     public:
       // @functions
-      virtual void log(std::string msg, std::string src) = 0;
+      virtual int log(std::string msg, std::string prefix) = 0;
   };
 }

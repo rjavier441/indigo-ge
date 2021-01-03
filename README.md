@@ -13,8 +13,9 @@ Updated: 2020-12-29
 ## **Table of Contents**
 
 - [Dependencies](#dependencies)
+- [Prerequesites](#prerequesites)
 - [Setup](#setup)
-    - [Linux/Mac](#linuxmac)
+    - [Linux](#linux)
 - [Release Notes](#release-notes)
 
 ---
@@ -29,17 +30,46 @@ This project was built under Ubuntu 20.04 (WSL2) and tested using the following 
 - [FakeIt](https://github.com/eranpeer/FakeIt) v2.0.5 C++ Mocking Framework
 - *[VcXsrv](https://github.com/ArcticaProject/vcxsrv) v1.20.8.1 WSL2 X-Server
 
-_*Only required if running Indigo in WSL2_
+_*Only required if running Indigo games in WSL2_
+
+---
+
+## **Prerequesites**
+
+This section will go over initial configuration steps required for the setup section. Make sure to complete this section _**before**_ proceeding to [Setup](#setup).
+
+### Catch2 Setup
+
+1. A single-file header for Catch2 v2.13.3 is _**already**_ included under `test/lib/catch2/catch.hpp`.
+
+1. However, you may use any other version of choice by replacing this file.
+    - Make sure to name the file `"catch.hpp"`.
+
+### FakeIt Setup
+
+1. Clone the [FakeIt Github](https://github.com/eranpeer/FakeIt) repository locally.
+
+1. Copy and save its path to `test/lib/fakeit/config.txt`
+
+    - Using an _**absolute**_ path works best, but relative paths can still be used (with respect to the `indigo/` directory).
+    
+    - Be sure to _**omit**_ trailing slashes in the path name:
+
+        ```
+        Incorrect: /path/to/FakeIt/
+
+        Correct: /path/to/FakeIt
+        ```
 
 ---
 
 ## **Setup**
 
-Make sure you have the above dependencies installed and configured _**before**_ proceeding.
+Make sure you have completed the [Prerequesites](#prerequesites) section _**before**_ proceeding.
 
-### Linux/Mac
+### Linux
 
-Setup on Ubuntu Linux or Mac OS systems can be done through the following steps:
+Setup on Ubuntu Linux systems can be done through the following steps:
 
 #### Verify Environment Utilities
     
@@ -51,6 +81,7 @@ Setup on Ubuntu Linux or Mac OS systems can be done through the following steps:
     ```
 
 - Once required setup tools and utilities are installed, you can begin setup below.
+    - If verification fails or your system is not Ubuntu Linux, you will have to perform [Manual Setup](#manual-setup).
 
 #### Quick Setup
 
@@ -66,13 +97,13 @@ Setup on Ubuntu Linux or Mac OS systems can be done through the following steps:
 #### Manual Setup
 
 - Acquire SFML v2.0.5 via any of the following means:
+
     - Visit the [SFML website](https://www.sfml-dev.org/), download a compatible version and install it in your system.
+
     - Use your system's package manager (e.g. `apt`, `yum`, etc.) to acquire and install a compatible version.
-- Ensure Catch2 v2.13.3 is included under `indigo/test/lib/catch2/`.
-- If Catch2 is not found, acquire it via any of the following means:
-    - Visit [Catch2 on Github](https://github.com/catchorg/Catch2), download the latest [single-header version](https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp), then save the resulting `catch.hpp` file under `indigo/test/lib/catch2/catch.hpp` (create the directory if it doesn't exist).
-    - Use your system's package manager to acquire a compatible version.
-- Ensure FakeIt v2.0.5 is installed under `indigo/test/lib/fakeit`
+- If you would like to use a different Catch2 version:
+
+    - Visit [Catch2 on Github](https://github.com/catchorg/Catch2), download the desired [single-header version](https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp), then save the resulting `catch.hpp` file under `indigo/test/lib/catch2/catch.hpp` (create the directory if it doesn't exist).
 
 #### Test Installation
 
@@ -90,9 +121,8 @@ Setup on Ubuntu Linux or Mac OS systems can be done through the following steps:
 
 ## **Release Notes**
 
-- 2020-11-20
-    - _(**For Ubuntu 20.04 WSL2 only**)_
-        - Ubuntu 20.04 under WSL2 _**does not**_ come pre-packaged with a GUI environment to render graphics on.
+- 2020-11-20 _**(For Ubuntu WSL2 only)**_
+    - Ubuntu 20.04 under WSL2 _**does not**_ come pre-packaged with an environment to render any GUIs.
         - However, you can _**forward**_ the rendering to your primary OS (i.e. Windows 10) via an X-Server, allowing you to run an Indigo game GUI by "proxy".
         - Install [VcXsrv](https://github.com/ArcticaProject/vcxsrv) and configure it to run in your WSL2 system before starting setup.
     - If you are using WSL2 during a test run with "`./setup.sh -t`":

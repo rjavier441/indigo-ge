@@ -20,8 +20,8 @@ namespace Indigo {
   // @description     Console message logging class
   class ConsoleLogger : public Indigo::Logger {
     public:
-      void log(
-        std::string msg, std::string src = Indigo::EMPTY_STRING
+      int log(
+        std::string msg, std::string prefix = Indigo::EMPTY_STRING
       ) override;
       static ConsoleLogger& getInstance();
     private:

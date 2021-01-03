@@ -30,10 +30,13 @@ DIR_SRC = ./src
 DIR_TEST = ./test
 DIR_BUILD = ./build
 DIR_OBJ = $(DIR_BUILD)/obj
+DIR_FAKEIT = $(shell cat $(DIR_TEST)/lib/fakeit/config.txt)
 
 # Compilation Options
 CC = g++
-CFLAGS = -I$(DIR_CLASS) -I$(DIR_OBJ) -I$(DIR_SRC) -I$(DIR_IFACE)
+CFLAGS = -std=c++11 -c -Wall
+# FAKEIT_FLAGS = -I$(DIR_FAKEIT)/include -I$(DIR_FAKEIT)/config/catch -I$(DIR_TEST)/lib/catch2
+FAKEIT_FLAGS = -I$(DIR_FAKEIT)/single_header/catch -I$(DIR_TEST)/lib/catch2
 REQS = -lsfml-system -lsfml-window -lsfml-graphics -lsfml-audio
 EXENAME = game.exe
 TESTNAME = unittests.exe
@@ -68,7 +71,7 @@ compile_game:
 	@echo "test files: $(TEST_FILES)"
 
 	@echo "$(AES_THEME_PRIMARY)[ Compiling Game ]$(AES_RESET)"
-	$(CC) -c -Wall $(MODULE_FILES) $(IFACE_FILES) $(CLASS_FILES) $(SRC_FILES)
+	$(CC) $(CFLAGS) $(MODULE_FILES) $(IFACE_FILES) $(CLASS_FILES) $(SRC_FILES)
 
 	@echo "$(AES_THEME_SUCCESS)[ Done ]$(AES_RESET)"
 
@@ -83,7 +86,7 @@ compile_tests:
 	@echo "test files: $(TEST_FILES)"
 
 	@echo "$(AES_THEME_PRIMARY)[ Compiling Tests ]$(AES_RESET)"
-	$(CC) -c -Wall $(MODULE_FILES) $(IFACE_FILES) $(CLASS_FILES) $(TEST_FILES)
+	$(CC) $(CFLAGS) $(FAKEIT_FLAGS) $(MODULE_FILES) $(IFACE_FILES) $(CLASS_FILES) $(TEST_FILES)
 
 	@echo "$(AES_THEME_SUCCESS)[ Done ]$(AES_RESET)"
 
@@ -119,9 +122,12 @@ clean:
 	@rm -fr ./*.exe
 	@echo "$(AES_THEME_SUCCESS)[ Done ]$(AES_RESET)"
 
-# Compiles the unit tests
+# Compiles the unit tests and marks current mode as "TESTMODE"
 test: TESTMODE := yes
 test: compile_prologue compile_tests collect_objects link_objects compile_epilogue
+
+debug:
+	@echo "DEBUG: $(DIR_FAKEIT)"
 # END Make Rules
 
 # EOF makefile
