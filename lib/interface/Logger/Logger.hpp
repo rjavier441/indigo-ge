@@ -11,11 +11,9 @@
 
 // @includes
 #include <string>
+#include "../../class/Constants.hpp"
 
 namespace Indigo {
-
-  // @constants
-  const std::string EMPTY_STRING = "";
 
   // @abstract        Logger
   // @description     Abstract class for loggers of any kind

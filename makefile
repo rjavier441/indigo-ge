@@ -34,7 +34,7 @@ DIR_FAKEIT = $(shell cat $(DIR_TEST)/lib/fakeit/config.txt)
 
 # Compilation Options
 CC = g++
-CFLAGS = -std=c++11 -c -Wall
+CFLAGS = -std=c++17 -c -Wall
 # FAKEIT_FLAGS = -I$(DIR_FAKEIT)/include -I$(DIR_FAKEIT)/config/catch -I$(DIR_TEST)/lib/catch2
 FAKEIT_FLAGS = -I$(DIR_FAKEIT)/single_header/catch -I$(DIR_TEST)/lib/catch2
 REQS = -lsfml-system -lsfml-window -lsfml-graphics -lsfml-audio
