@@ -15,5 +15,7 @@
 using namespace std;
 
 namespace Indigo {
-  const string kEmptyString = "";
+  
+  // @general constants
+  inline const string kEmptyString = "";
 }
