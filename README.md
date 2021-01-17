@@ -42,24 +42,18 @@ This section will go over initial configuration steps required for the setup sec
 
 1. A single-file header for Catch2 v2.13.3 is _**already**_ included under `test/lib/catch2/catch.hpp`.
 
-1. However, you may use any other version of choice by replacing this file.
+1. However, you may use any other _**compatible**_ version by replacing the file in that directory.
     - Make sure to name the file `"catch.hpp"`.
 
 ### FakeIt Setup
 
-1. Clone the [FakeIt Github](https://github.com/eranpeer/FakeIt) repository locally.
+1. A single-file header for FakeIt v2.0.5 is _**already**_ included under `test/lib/fakeit/single_header/catch/fakeit.hpp`. However, you will need to create the file `test/lib/fakeit/config.txt` and place the following content inside it:
+    ```
+    ./test/lib/fakeit
+    ```
 
-1. Copy and save its path to `test/lib/fakeit/config.txt`
-
-    - Using an _**absolute**_ path works best, but relative paths can still be used (with respect to the `indigo/` directory).
-    
-    - Be sure to _**omit**_ trailing slashes in the path name:
-
-        ```
-        Incorrect: /path/to/FakeIt/
-
-        Correct: /path/to/FakeIt
-        ```
+1. However, you may use any other _**compatible**_ version by replacing the file in that directory.
+    - Make sure to name the file `"fakeit.hpp"`.
 
 ---
 
