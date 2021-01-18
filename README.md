@@ -1,12 +1,16 @@
+<p align="center">
+<img width="200px" src="assets/images/Indigo-GE-Logo-01.png" />
+</p>
+
 # **Indigo**
 
-A 2D RPG Engine for building RPG games
+A 2D Game Engine for building a variety of 2D games
 
 Current Version: v0.0.1
 
 Created: 2019-03-20
 
-Updated: 2020-12-29
+Updated: 2021-01-17
 
 ---
 
@@ -22,7 +26,7 @@ Updated: 2020-12-29
 
 ## **Dependencies**
 
-This project was built under Ubuntu 20.04 (WSL2) and tested using the following tools and libraries:
+This project was built for Ubuntu 20.04 using the following tools and libraries:
 
 - [SFML](https://www.sfml-dev.org/index.php) v2.5.1 using C++ 11
 - [GNU G++](https://gcc.gnu.org/) v7.3.0 C++ Compiler
@@ -31,6 +35,8 @@ This project was built under Ubuntu 20.04 (WSL2) and tested using the following 
 - *[VcXsrv](https://github.com/ArcticaProject/vcxsrv) v1.20.8.1 WSL2 X-Server
 
 _*Only required if running Indigo games in WSL2_
+
+Use of Ubuntu 20.04 via WSL2 with BASH is also possible. Installation/setup instructions for this are the same as those in the [Linux](#linux) section.
 
 ---
 
@@ -115,6 +121,8 @@ Setup on Ubuntu Linux systems can be done through the following steps:
 
 ## **Release Notes**
 
+- 2021-01-17 _**(For Ubuntu WSL2 only)**_
+    - Support for sound using VcXsrv is TBD.
 - 2020-11-20 _**(For Ubuntu WSL2 only)**_
     - Ubuntu 20.04 under WSL2 _**does not**_ come pre-packaged with an environment to render any GUIs.
         - However, you can _**forward**_ the rendering to your primary OS (i.e. Windows 10) via an X-Server, allowing you to run an Indigo game GUI by "proxy".
