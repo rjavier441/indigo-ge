@@ -12,6 +12,7 @@
 // @includes
 #include <string>
 #include <SFML/Window/Event.hpp>
+#include "../../interface/NamedEntity/NamedEntity.hpp"
 #include "../CallbackResponse/CallbackResponse.hpp"
 #include "../GameState/GameState.hpp"
 using namespace std;
@@ -32,7 +33,7 @@ namespace Indigo {
   // @class           Callback
   // @description     A callback function pointer and associated data
   //                  container.
-  class Callback {
+  class Callback : public NamedEntity {
     private:
       string name_;
       CallbackFunctionPointer funcPtr_;
@@ -43,7 +44,9 @@ namespace Indigo {
         GameState* caller,
         CallbackFunctionPointer funcPtr
       );
+
       string getName();
+      
       CallbackFunctionPointer getFunction();
       CallbackResponse createResponse( string msg );
       CallbackResponse run(
