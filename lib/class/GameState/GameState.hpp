@@ -10,22 +10,31 @@
 #pragma once
 
 // @includes
+#include<unordered_set>
+#include<map>
 #include "../../interface/DirectedNode/DirectedNode.hpp"
+#include "../../interface/NamedEntity/NamedEntity.hpp"
+// #include "../../class/CallbackContainer/CallbackContainer.hpp"
 using namespace std;
 
 namespace Indigo{
 
-    // @class           GameState
-    // @description     A game state that has knowledge of possible next
-    //                  and previous states.
-    class GameState {
-        private:
-            static unsigned int totalDistinctStates;
-            string name;
-            unsigned int id;
-            unordered_set<DirectedNode*> ancestors;
-            unordered_set<DirectedNode*> descendants;
-            
-            // TODO 2021-01-16: add callbacks
-    };
+  // @class           GameState
+  // @description     A game state that has knowledge of possible next
+  //                  and previous states.
+  class GameState : public NamedEntity {
+    protected:
+      static unsigned int total_distinct_states_;
+      static map<string, GameState*> state_roster_;
+    private:
+      string name_;
+      unsigned int id_;
+      
+      // TODO 2021-01-16: add callback container
+      // CallbackContainer callbacks_;
+    public:
+      string getName();
+
+      // TODO 2021-01-16: Add public methods
+  };
 }

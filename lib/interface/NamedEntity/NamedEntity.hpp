@@ -7,6 +7,7 @@
 //                  Defines an interface for named items.
 // Dependencies:
 //                  n/a
+#pragma once
 
 // @includes
 #include <string>

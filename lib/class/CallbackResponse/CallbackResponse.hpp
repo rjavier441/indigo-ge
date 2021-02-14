@@ -20,7 +20,7 @@ namespace Indigo {
   //                  the different callback response types.
   namespace CallbackResponseType {
     inline const char* kSuccess = "CallbackResponseSuccess";
-    inline const char* kUncaughtException = "CallbackResponseUncaughtExecption";
+    inline const char* kUncaughtException = "CallbackResponseUncaughtException";
   }
 
   // @class           CallbackResponse

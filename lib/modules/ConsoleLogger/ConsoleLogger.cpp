@@ -217,8 +217,8 @@ bool Indigo::ConsoleLogger::open(string path, Indigo::LogWriter::Mode dsm) {
     }
   } catch( const exception& e ) {
     printf("[ERR] %s\n", e.what());
-    return false;
   }
+  return false;
 }
 
 // @function        write()
